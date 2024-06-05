@@ -1,12 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class SetNavigationTarget : MonoBehaviour
 {
+    [SerializeField] private TMP_Dropdown targetListDropdown;
+    [SerializeField] private List<Target> targetList = new List<Target>();
     [SerializeField] private Camera topDownCamera;
-    [SerializeField] private GameObject navTargetObj;
+    [SerializeField] private Vector3 targetPosition = Vector3.zero;
 
     private NavMeshPath path;
     private LineRenderer line;
@@ -17,6 +20,7 @@ public class SetNavigationTarget : MonoBehaviour
     {
         path = new NavMeshPath();
         line = GetComponent<LineRenderer>();
+        line.enabled = lineToggle;
     }
 
     // Update is called once per frame
@@ -26,12 +30,24 @@ public class SetNavigationTarget : MonoBehaviour
         {
             lineToggle = !lineToggle;
         }
-        if (lineToggle)
+        if (lineToggle && targetPosition != Vector3.zero)
         {
-            NavMesh.CalculatePath(transform.position, navTargetObj.transform.position, NavMesh.AllAreas, path);
+            NavMesh.CalculatePath(transform.position, targetPosition, NavMesh.AllAreas, path);
             line.positionCount = path.corners.Length;
             line.SetPositions(path.corners);
             line.enabled = true;
         }
+        else
+        {
+            line.enabled = false;
+        }
+    }
+    public void SetCurrentNavigationTarget()
+    {
+        targetPosition = targetList[targetListDropdown.value].positionObj.transform.position;
+    }
+    public List<Target> GetTargetList()
+    {
+        return targetList;
     }
 }
