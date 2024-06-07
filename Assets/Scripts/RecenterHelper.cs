@@ -6,6 +6,7 @@ using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 using ZXing;
 using Unity.Collections;
+using UnityEngine.UI;
 
 
 public class RecenterHelper : MonoBehaviour
@@ -14,9 +15,11 @@ public class RecenterHelper : MonoBehaviour
     [SerializeField] private XROrigin sessionOrigin;
     [SerializeField] private ARCameraManager cameraManager;
     [SerializeField] private List<Target> targetList = new List<Target>();
+    [SerializeField] private Button calibrateButton;
 
     private Texture2D cameraImageTexture;
     private IBarcodeReader reader = new BarcodeReader();
+    private string qrCodeResult;
     // Start is called before the first frame update
     void Start()
     {
@@ -62,14 +65,16 @@ public class RecenterHelper : MonoBehaviour
         var result = reader.Decode(cameraImageTexture.GetPixels32(), cameraImageTexture.width, cameraImageTexture.height);
         if (result != null)
         {
-            SetQRCodeRecenterTarget(result.Text);
+            qrCodeResult = result.Text;
+            calibrateButton.gameObject.SetActive(true);
         }
     }
-    private void SetQRCodeRecenterTarget(string targetName)
+
+    public void SetQRCodeRecenterTarget()
     {
         foreach (var target in targetList)
         {
-            if (target.targetName == targetName)
+            if (target.targetName == qrCodeResult)
             {
                 session.Reset();
                 sessionOrigin.transform.position = target.positionObj.transform.position;
@@ -77,5 +82,6 @@ public class RecenterHelper : MonoBehaviour
                 break;
             }
         }
+        calibrateButton.gameObject.SetActive(false);
     }
 }
