@@ -37,6 +37,7 @@ public class SetNavigationTarget : MonoBehaviour
         line = GetComponent<LineRenderer>();
         line.enabled = lineToggle;
         cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
+        SearchForMeshRenderer(wallParent.transform, occlusionMaterial);
     }
 
     // Update is called once per frame
@@ -74,12 +75,12 @@ public class SetNavigationTarget : MonoBehaviour
         wallToggle = !wallToggle;
         if (wallToggle)
         {
-            wallToggleButton.GetComponentInChildren<TMP_Text>().text = "Show Wall";
+            wallToggleButton.GetComponentInChildren<TMP_Text>().text = "Hide Wall";
             SearchForMeshRenderer(wallParent.transform, defaultMaterial);
         }
         else
         {
-            wallToggleButton.GetComponentInChildren<TMP_Text>().text = "Hide Wall";
+            wallToggleButton.GetComponentInChildren<TMP_Text>().text = "Show Wall";
             SearchForMeshRenderer(wallParent.transform, occlusionMaterial);
         }
     }
