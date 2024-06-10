@@ -68,6 +68,10 @@ public class RecenterHelper : MonoBehaviour
             qrCodeResult = result.Text;
             calibrateButton.gameObject.SetActive(true);
         }
+        else
+        {
+            calibrateButton.gameObject.SetActive(false);
+        }
     }
 
     public void SetQRCodeRecenterTarget()

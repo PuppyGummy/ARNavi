@@ -21,6 +21,7 @@ public class SetNavigationTarget : MonoBehaviour
     private NavMeshPath path;
     private LineRenderer line;
     private ARWorldPositioningCameraHelper cameraHelper;
+    private GameObject currentTarget;
     [SerializeField] private ARCameraManager arCameraManager;
     [SerializeField] private ARWorldPositioningManager wpsManager;
     [SerializeField] private Button wallToggleButton;
@@ -29,13 +30,14 @@ public class SetNavigationTarget : MonoBehaviour
     [SerializeField] private Material occlusionMaterial;
     private bool wallToggle = false;
 
-    private bool lineToggle = false;
+    // private bool lineToggle = false;
     // Start is called before the first frame update
     private void Start()
     {
         path = new NavMeshPath();
         line = GetComponent<LineRenderer>();
-        line.enabled = lineToggle;
+        // line.enabled = lineToggle;
+        line.enabled = false;
         cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
         SearchForMeshRenderer(wallParent.transform, occlusionMaterial);
     }
@@ -43,12 +45,12 @@ public class SetNavigationTarget : MonoBehaviour
     // Update is called once per frame
     private void Update()
     {
-        if ((Input.touchCount > 0) && (Input.GetTouch(0).phase == TouchPhase.Began))
-        {
-            lineToggle = !lineToggle;
-        }
+        // if ((Input.touchCount > 0) && (Input.GetTouch(0).phase == TouchPhase.Began))
+        // {
+        //     lineToggle = !lineToggle;
+        // }
         statusText.text = "WPS: " + wpsManager.Status.ToString();
-        if (lineToggle && targetPosition != Vector3.zero)
+        if (targetPosition != Vector3.zero)
         {
             WorldPositionUpdate();
             NavMesh.CalculatePath(transform.position, targetPosition, NavMesh.AllAreas, path);
@@ -63,7 +65,15 @@ public class SetNavigationTarget : MonoBehaviour
     }
     public void SetCurrentNavigationTarget()
     {
-        targetPosition = targetList[targetListDropdown.value].positionObj.transform.position;
+        // Disable the previous target
+        if (currentTarget != null)
+        {
+            currentTarget.GetComponent<MeshRenderer>().enabled = false;
+        }
+
+        currentTarget = targetList[targetListDropdown.value].positionObj;
+        currentTarget.GetComponent<MeshRenderer>().enabled = true;
+        targetPosition = currentTarget.transform.position;
     }
     private void WorldPositionUpdate()
     {
