@@ -8,7 +8,7 @@ using UnityEngine.XR.ARFoundation;
 using Unity.XR.CoreUtils;
 using UnityEngine.UI;
 
-public class SetNavigationTarget : MonoBehaviour
+public class NavigationManager : MonoBehaviour
 {
     [SerializeField] private TMP_Dropdown targetListDropdown;
     [SerializeField] private List<Target> targetList = new List<Target>();
@@ -28,6 +28,7 @@ public class SetNavigationTarget : MonoBehaviour
     [SerializeField] private GameObject wallParent;
     [SerializeField] private Material defaultMaterial;
     [SerializeField] private Material occlusionMaterial;
+    [SerializeField] private Slider lineYOffsetSlider;
     private bool wallToggle = false;
 
     // private bool lineToggle = false;
@@ -39,7 +40,8 @@ public class SetNavigationTarget : MonoBehaviour
         // line.enabled = lineToggle;
         line.enabled = false;
         cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
-        SearchForMeshRenderer(wallParent.transform, occlusionMaterial);
+        SetMaterial(wallParent.transform, occlusionMaterial);
+        FillTargetDropdown();
     }
 
     // Update is called once per frame
@@ -55,13 +57,31 @@ public class SetNavigationTarget : MonoBehaviour
             WorldPositionUpdate();
             NavMesh.CalculatePath(transform.position, targetPosition, NavMesh.AllAreas, path);
             line.positionCount = path.corners.Length;
-            line.SetPositions(path.corners);
+            Vector3[] calculatedPosition = CalculateLineOffset();
+            line.SetPositions(calculatedPosition);
             line.enabled = true;
         }
         else
         {
             line.enabled = false;
         }
+    }
+    private Vector3[] CalculateLineOffset()
+    {
+        if (lineYOffsetSlider.value == 0)
+        {
+            return path.corners;
+        }
+        Vector3[] calculatedPosition = new Vector3[path.corners.Length];
+        for (int i = 0; i < path.corners.Length; i++)
+        {
+            calculatedPosition[i] = path.corners[i] + new Vector3(0, lineYOffsetSlider.value, 0);
+        }
+        return calculatedPosition;
+    }
+    public void SetLineYOffsetText()
+    {
+        lineYOffsetSlider.GetComponentInChildren<TMP_Text>().text = "Line Y Offset: " + lineYOffsetSlider.value.ToString();
     }
     public void SetCurrentNavigationTarget()
     {
@@ -86,15 +106,15 @@ public class SetNavigationTarget : MonoBehaviour
         if (wallToggle)
         {
             wallToggleButton.GetComponentInChildren<TMP_Text>().text = "Hide Wall";
-            SearchForMeshRenderer(wallParent.transform, defaultMaterial);
+            SetMaterial(wallParent.transform, defaultMaterial);
         }
         else
         {
             wallToggleButton.GetComponentInChildren<TMP_Text>().text = "Show Wall";
-            SearchForMeshRenderer(wallParent.transform, occlusionMaterial);
+            SetMaterial(wallParent.transform, occlusionMaterial);
         }
     }
-    private void SearchForMeshRenderer(Transform parent, Material material)
+    private void SetMaterial(Transform parent, Material material)
     {
         // Search for all the children of the wall parent with a mesh renderer component
         // if the child has a mesh renderer component, change the material to the default material
@@ -108,8 +128,18 @@ public class SetNavigationTarget : MonoBehaviour
             }
             else
             {
-                SearchForMeshRenderer(child, material);
+                SetMaterial(child, material);
             }
         }
+    }
+    private void FillTargetDropdown()
+    {
+        targetListDropdown.ClearOptions();
+        List<string> targetNames = new List<string>();
+        foreach (var target in targetList)
+        {
+            targetNames.Add(target.targetName);
+        }
+        targetListDropdown.AddOptions(targetNames);
     }
 }

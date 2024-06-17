@@ -7,6 +7,7 @@ using UnityEngine.XR.ARSubsystems;
 using ZXing;
 using Unity.Collections;
 using UnityEngine.UI;
+using TMPro;
 
 
 public class RecenterHelper : MonoBehaviour
@@ -15,11 +16,12 @@ public class RecenterHelper : MonoBehaviour
     [SerializeField] private XROrigin sessionOrigin;
     [SerializeField] private ARCameraManager cameraManager;
     [SerializeField] private List<Target> targetList = new List<Target>();
-    [SerializeField] private Button calibrateButton;
+    [SerializeField] private TMP_Text calibrationText;
 
     private Texture2D cameraImageTexture;
     private IBarcodeReader reader = new BarcodeReader();
     private string qrCodeResult;
+    private bool scanningEnabled = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -42,6 +44,10 @@ public class RecenterHelper : MonoBehaviour
     }
     private void OnCameraFrameReceived(ARCameraFrameEventArgs eventArgs)
     {
+        if (!scanningEnabled)
+        {
+            return;
+        }
         if (!cameraManager.TryAcquireLatestCpuImage(out var cameraImage))
         {
             return;
@@ -66,11 +72,12 @@ public class RecenterHelper : MonoBehaviour
         if (result != null)
         {
             qrCodeResult = result.Text;
-            calibrateButton.gameObject.SetActive(true);
+            calibrationText.text = "QR Code Detected: " + qrCodeResult;
+            SetQRCodeRecenterTarget();
         }
         else
         {
-            calibrateButton.gameObject.SetActive(false);
+            calibrationText.text = "No QR Code Detected";
         }
     }
 
@@ -81,11 +88,23 @@ public class RecenterHelper : MonoBehaviour
             if (target.targetName == qrCodeResult)
             {
                 session.Reset();
-                sessionOrigin.transform.position = target.positionObj.transform.position;
-                sessionOrigin.transform.rotation = target.positionObj.transform.rotation;
+                sessionOrigin.transform.SetPositionAndRotation(target.positionObj.transform.position, target.positionObj.transform.rotation);
                 break;
             }
         }
-        calibrateButton.gameObject.SetActive(false);
+        scanningEnabled = false;
+        calibrationText.gameObject.SetActive(false);
+    }
+    public void ToggleScanning()
+    {
+        scanningEnabled = !scanningEnabled;
+        if (scanningEnabled)
+        {
+            calibrationText.gameObject.SetActive(true);
+        }
+        else
+        {
+            calibrationText.gameObject.SetActive(false);
+        }
     }
 }
