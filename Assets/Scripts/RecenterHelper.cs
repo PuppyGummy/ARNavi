@@ -18,6 +18,7 @@ public class RecenterHelper : MonoBehaviour
     [SerializeField] private GameObject recenterTargetsParent;
     [SerializeField] private List<GameObject> recenterTargetList = new List<GameObject>();
     [SerializeField] private TMP_Text calibrationText;
+    [SerializeField] private Image scanPanel;
 
     private Texture2D cameraImageTexture;
     private IBarcodeReader reader = new BarcodeReader();
@@ -57,6 +58,7 @@ public class RecenterHelper : MonoBehaviour
             return;
         }
 
+        scanPanel.gameObject.SetActive(true);
         var conversionParams = new XRCpuImage.ConversionParams
         {
             inputRect = new RectInt(0, 0, cameraImage.width, cameraImage.height),
@@ -93,11 +95,13 @@ public class RecenterHelper : MonoBehaviour
             {
                 session.Reset();
                 sessionOrigin.transform.SetPositionAndRotation(target.transform.position, target.transform.rotation);
+                // NavigationManager.Instance.userIndicator.transform.SetPositionAndRotation(target.transform.position, target.transform.rotation);
                 break;
             }
         }
         scanningEnabled = false;
         calibrationText.gameObject.SetActive(false);
+        scanPanel.gameObject.SetActive(false);
     }
     public void ToggleScanning()
     {

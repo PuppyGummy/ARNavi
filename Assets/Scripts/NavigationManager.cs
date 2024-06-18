@@ -12,10 +12,10 @@ public class NavigationManager : MonoBehaviour
 {
     [SerializeField] private TMP_Dropdown targetListDropdown;
     [SerializeField] private GameObject targetsParent;
-    [SerializeField] private List<GameObject> targetList = new List<GameObject>();
+    private List<GameObject> targetList = new List<GameObject>();
     [SerializeField] private Camera topDownCamera;
-    [SerializeField] private Vector3 targetPosition = Vector3.zero;
-    [SerializeField] private TMP_Text statusText;
+    private Vector3 targetPosition = Vector3.zero;
+    // [SerializeField] private TMP_Text statusText;
     // [SerializeField] private TMP_Text lineToggleText;
     [SerializeField] private XROrigin sessionOrigin;
     [SerializeField] private LineRenderer line;
@@ -27,15 +27,26 @@ public class NavigationManager : MonoBehaviour
     [SerializeField] private Material defaultMaterial;
     [SerializeField] private Material occlusionMaterial;
     [SerializeField] private Slider lineYOffsetSlider;
-    [SerializeField] private GameObject userIndicator;
+    [SerializeField] public GameObject userIndicator;
     private bool wallToggle = false;
     private NavMeshPath path;
     private GameObject currentTarget;
 
     // private bool lineToggle = false;
     // Start is called before the first frame update
-    private void Start()
+
+    public static NavigationManager Instance;
+    private void Awake()
     {
+        if (Instance != null)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+
+        Instance = this;
+        GameObject.DontDestroyOnLoad(this.gameObject);
+
         path = new NavMeshPath();
         // line = GetComponent<LineRenderer>();
         // line.enabled = lineToggle;
@@ -48,7 +59,7 @@ public class NavigationManager : MonoBehaviour
             targetList.Add(target.gameObject);
         }
     }
-    private void OnGUI()
+    private void Start()
     {
         FillTargetDropdown();
     }
@@ -65,7 +76,7 @@ public class NavigationManager : MonoBehaviour
         if (targetPosition != Vector3.zero)
         {
             // WorldPositionUpdate();
-            NavMesh.CalculatePath(transform.position, targetPosition, NavMesh.AllAreas, path);
+            NavMesh.CalculatePath(userIndicator.transform.position, targetPosition, NavMesh.AllAreas, path);
             line.positionCount = path.corners.Length;
             Vector3[] calculatedPosition = CalculateLineOffset();
             line.SetPositions(calculatedPosition);
@@ -113,7 +124,8 @@ public class NavigationManager : MonoBehaviour
     private void UpdateUserRotation()
     {
         // Set the rotation according to the AR camera's rotation
-        userIndicator.transform.rotation = arCameraManager.transform.rotation;
+        Quaternion originalRotation = userIndicator.transform.rotation;
+        userIndicator.transform.rotation = new Quaternion(originalRotation.x, arCameraManager.transform.rotation.y, originalRotation.z, originalRotation.w);
     }
     public void ToggleWall()
     {
