@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
-using Niantic.Experimental.Lightship.AR.WorldPositioning;
+// using Niantic.Experimental.Lightship.AR.WorldPositioning;
 using UnityEngine.XR.ARFoundation;
 using Unity.XR.CoreUtils;
 using UnityEngine.UI;
@@ -11,36 +11,45 @@ using UnityEngine.UI;
 public class NavigationManager : MonoBehaviour
 {
     [SerializeField] private TMP_Dropdown targetListDropdown;
-    [SerializeField] private List<Target> targetList = new List<Target>();
+    [SerializeField] private GameObject targetsParent;
+    [SerializeField] private List<GameObject> targetList = new List<GameObject>();
     [SerializeField] private Camera topDownCamera;
     [SerializeField] private Vector3 targetPosition = Vector3.zero;
     [SerializeField] private TMP_Text statusText;
     // [SerializeField] private TMP_Text lineToggleText;
     [SerializeField] private XROrigin sessionOrigin;
-
-    private NavMeshPath path;
-    private LineRenderer line;
-    private ARWorldPositioningCameraHelper cameraHelper;
-    private GameObject currentTarget;
+    [SerializeField] private LineRenderer line;
+    // private ARWorldPositioningCameraHelper cameraHelper;
     [SerializeField] private ARCameraManager arCameraManager;
-    [SerializeField] private ARWorldPositioningManager wpsManager;
+    // [SerializeField] private ARWorldPositioningManager wpsManager;
     [SerializeField] private Button wallToggleButton;
     [SerializeField] private GameObject wallParent;
     [SerializeField] private Material defaultMaterial;
     [SerializeField] private Material occlusionMaterial;
     [SerializeField] private Slider lineYOffsetSlider;
+    [SerializeField] private GameObject userIndicator;
     private bool wallToggle = false;
+    private NavMeshPath path;
+    private GameObject currentTarget;
 
     // private bool lineToggle = false;
     // Start is called before the first frame update
     private void Start()
     {
         path = new NavMeshPath();
-        line = GetComponent<LineRenderer>();
+        // line = GetComponent<LineRenderer>();
         // line.enabled = lineToggle;
         line.enabled = false;
-        cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
+        // cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
         SetMaterial(wallParent.transform, occlusionMaterial);
+        // Fill target list with the children of the targets parent
+        foreach (Transform target in targetsParent.transform)
+        {
+            targetList.Add(target.gameObject);
+        }
+    }
+    private void OnGUI()
+    {
         FillTargetDropdown();
     }
 
@@ -51,10 +60,11 @@ public class NavigationManager : MonoBehaviour
         // {
         //     lineToggle = !lineToggle;
         // }
-        statusText.text = "WPS: " + wpsManager.Status.ToString();
+        // statusText.text = "WPS: " + wpsManager.Status.ToString();
+        UpdateUserRotation();
         if (targetPosition != Vector3.zero)
         {
-            WorldPositionUpdate();
+            // WorldPositionUpdate();
             NavMesh.CalculatePath(transform.position, targetPosition, NavMesh.AllAreas, path);
             line.positionCount = path.corners.Length;
             Vector3[] calculatedPosition = CalculateLineOffset();
@@ -91,14 +101,19 @@ public class NavigationManager : MonoBehaviour
             currentTarget.GetComponent<MeshRenderer>().enabled = false;
         }
 
-        currentTarget = targetList[targetListDropdown.value].positionObj;
+        currentTarget = targetList[targetListDropdown.value].gameObject;
         currentTarget.GetComponent<MeshRenderer>().enabled = true;
         targetPosition = currentTarget.transform.position;
     }
-    private void WorldPositionUpdate()
+    // private void WorldPositionUpdate()
+    // {
+    //     float heading = cameraHelper.TrueHeading;
+    //     transform.rotation = Quaternion.Euler(0, heading, 0);
+    // }
+    private void UpdateUserRotation()
     {
-        float heading = cameraHelper.TrueHeading;
-        transform.rotation = Quaternion.Euler(0, heading, 0);
+        // Set the rotation according to the AR camera's rotation
+        userIndicator.transform.rotation = arCameraManager.transform.rotation;
     }
     public void ToggleWall()
     {
@@ -136,9 +151,9 @@ public class NavigationManager : MonoBehaviour
     {
         targetListDropdown.ClearOptions();
         List<string> targetNames = new List<string>();
-        foreach (var target in targetList)
+        foreach (GameObject target in targetList)
         {
-            targetNames.Add(target.targetName);
+            targetNames.Add(target.name);
         }
         targetListDropdown.AddOptions(targetNames);
     }

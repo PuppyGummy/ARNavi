@@ -6,7 +6,11 @@ public class Target : MonoBehaviour
 {
     public string targetName;
     public GameObject positionObj;
-
+    public Target(string targetName, GameObject positionObj)
+    {
+        this.targetName = targetName;
+        this.positionObj = positionObj;
+    }
     private void Start()
     {
         if (targetName == null || targetName == "")

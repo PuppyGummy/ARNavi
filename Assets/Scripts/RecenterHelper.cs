@@ -15,7 +15,8 @@ public class RecenterHelper : MonoBehaviour
     [SerializeField] private ARSession session;
     [SerializeField] private XROrigin sessionOrigin;
     [SerializeField] private ARCameraManager cameraManager;
-    [SerializeField] private List<Target> targetList = new List<Target>();
+    [SerializeField] private GameObject recenterTargetsParent;
+    [SerializeField] private List<GameObject> recenterTargetList = new List<GameObject>();
     [SerializeField] private TMP_Text calibrationText;
 
     private Texture2D cameraImageTexture;
@@ -25,7 +26,10 @@ public class RecenterHelper : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        foreach (Transform target in recenterTargetsParent.transform)
+        {
+            recenterTargetList.Add(target.gameObject);
+        }
     }
 
     // Update is called once per frame
@@ -83,12 +87,12 @@ public class RecenterHelper : MonoBehaviour
 
     public void SetQRCodeRecenterTarget()
     {
-        foreach (var target in targetList)
+        foreach (var target in recenterTargetList)
         {
-            if (target.targetName == qrCodeResult)
+            if (target.name == qrCodeResult)
             {
                 session.Reset();
-                sessionOrigin.transform.SetPositionAndRotation(target.positionObj.transform.position, target.positionObj.transform.rotation);
+                sessionOrigin.transform.SetPositionAndRotation(target.transform.position, target.transform.rotation);
                 break;
             }
         }
