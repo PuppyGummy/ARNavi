@@ -11,8 +11,11 @@ using UnityEngine.UI;
 public class NavigationManager : MonoBehaviour
 {
     [SerializeField] private TMP_Dropdown targetListDropdown;
-    [SerializeField] private GameObject targetsParent;
+    [SerializeField] private TMP_Dropdown floorListDropdown;
+    // [SerializeField] private GameObject targetsParent;
+    [SerializeField] private GameObject floorsParent;
     private List<GameObject> targetList = new List<GameObject>();
+    private List<GameObject> floorList = new List<GameObject>();
     [SerializeField] private Camera topDownCamera;
     private Vector3 targetPosition = Vector3.zero;
     // [SerializeField] private TMP_Text statusText;
@@ -31,6 +34,7 @@ public class NavigationManager : MonoBehaviour
     private bool wallToggle = false;
     private NavMeshPath path;
     private GameObject currentTarget;
+    public GameObject currentFloor;
 
     // private bool lineToggle = false;
     // Start is called before the first frame update
@@ -38,6 +42,7 @@ public class NavigationManager : MonoBehaviour
     public static NavigationManager Instance;
     private void Awake()
     {
+        // Singleton pattern
         if (Instance != null)
         {
             Destroy(this.gameObject);
@@ -47,20 +52,30 @@ public class NavigationManager : MonoBehaviour
         Instance = this;
         GameObject.DontDestroyOnLoad(this.gameObject);
 
-        path = new NavMeshPath();
-        // line = GetComponent<LineRenderer>();
-        // line.enabled = lineToggle;
-        line.enabled = false;
-        // cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
-        SetMaterial(wallParent.transform, occlusionMaterial);
+        // Fill floor list with the children of the floors parent
+        foreach (Transform floor in floorsParent.transform)
+        {
+            floorList.Add(floor.gameObject);
+        }
+
+        // Set the current floor to the first floor
+        currentFloor = floorList[0];
+
         // Fill target list with the children of the targets parent
-        foreach (Transform target in targetsParent.transform)
+        foreach (Transform target in currentFloor.transform)
         {
             targetList.Add(target.gameObject);
         }
     }
     private void Start()
     {
+        path = new NavMeshPath();
+        // line.enabled = lineToggle;
+        line.enabled = false;
+        // cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
+        SetMaterial(wallParent.transform, occlusionMaterial);
+
+        FillFloorDropdown();
         FillTargetDropdown();
     }
 
@@ -121,6 +136,24 @@ public class NavigationManager : MonoBehaviour
     //     float heading = cameraHelper.TrueHeading;
     //     transform.rotation = Quaternion.Euler(0, heading, 0);
     // }
+    public void SetCurrentFloor()
+    {
+        // int floorIndex = floorListDropdown.value;
+        // foreach (Transform floor in floorsParent.transform)
+        // {
+        //     floor.gameObject.SetActive(false);
+        // }
+        // floorsParent.transform.GetChild(floorIndex).gameObject.SetActive(true);
+        targetList.Clear();
+        currentTarget = null;
+        targetPosition = Vector3.zero;
+        currentFloor = floorList[floorListDropdown.value];
+        foreach (Transform target in currentFloor.transform)
+        {
+            targetList.Add(target.gameObject);
+        }
+        FillTargetDropdown();
+    }
     private void UpdateUserRotation()
     {
         // Set the rotation according to the AR camera's rotation
@@ -158,6 +191,16 @@ public class NavigationManager : MonoBehaviour
                 SetMaterial(child, material);
             }
         }
+    }
+    private void FillFloorDropdown()
+    {
+        floorListDropdown.ClearOptions();
+        List<string> floorNames = new List<string>();
+        foreach (Transform floor in floorsParent.transform)
+        {
+            floorNames.Add(floor.name);
+        }
+        floorListDropdown.AddOptions(floorNames);
     }
     private void FillTargetDropdown()
     {

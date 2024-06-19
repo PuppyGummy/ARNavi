@@ -89,16 +89,8 @@ public class RecenterHelper : MonoBehaviour
 
     public void SetQRCodeRecenterTarget()
     {
-        foreach (var target in recenterTargetList)
-        {
-            if (target.name == qrCodeResult)
-            {
-                session.Reset();
-                sessionOrigin.transform.SetPositionAndRotation(target.transform.position, target.transform.rotation);
-                // NavigationManager.Instance.userIndicator.transform.SetPositionAndRotation(target.transform.position, target.transform.rotation);
-                break;
-            }
-        }
+        Recenter(qrCodeResult);
+
         scanningEnabled = false;
         calibrationText.gameObject.SetActive(false);
         scanPanel.gameObject.SetActive(false);
@@ -113,6 +105,25 @@ public class RecenterHelper : MonoBehaviour
         else
         {
             calibrationText.gameObject.SetActive(false);
+        }
+    }
+    public void RecenterCurrentFloor()
+    {
+        // remove the spaces from the floor name
+        string currentFloorName = NavigationManager.Instance.currentFloor.name.Replace(" ", "");
+        string startPointName = currentFloorName + "StartPoint";
+        Recenter(startPointName);
+    }
+    private void Recenter(string targetName)
+    {
+        foreach (var target in recenterTargetList)
+        {
+            if (target.name == targetName)
+            {
+                session.Reset();
+                sessionOrigin.transform.SetPositionAndRotation(target.transform.position, target.transform.rotation);
+                break;
+            }
         }
     }
 }
