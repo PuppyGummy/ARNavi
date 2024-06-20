@@ -51,8 +51,20 @@ EditorBuildSettings:
     path: Assets/Samples/WPS/Scenes/CompassScene.unity
     guid: f036d5120f667497d9097f9e60b22d7f
   - enabled: 1
+    path: Assets/Scenes/Welcome.unity
+    guid: 950750146ffae8d4da3277760044d151
+  - enabled: 1
+    path: Assets/Scenes/MainMenu.unity
+    guid: fa23e8f22d7ee944993f0d610164d01e
+  - enabled: 1
     path: Assets/Scenes/Navigation.unity
     guid: edce15fdc0d1e47e9af0610544499fe3
+  - enabled: 1
+    path: Assets/Scenes/LanguageSelect.unity
+    guid: 36e62dbaf1e83614eab07907f92aa55b
+  - enabled: 1
+    path: Assets/Scenes/Settings.unity
+    guid: a3be7a8c93b012b46a95dbe6f6b4e0af
   m_configObjects:
     Niantic.Lightship.AR.LightshipSettings: {fileID: 11400000, guid: 05b0489c7d3114fe3b5a5321c06a66dd, type: 2}
     Niantic.Lightship.AR.WPSSettings: {fileID: 11400000, guid: ee6baa83fec89444b99181fc1ccffc2a, type: 2}
