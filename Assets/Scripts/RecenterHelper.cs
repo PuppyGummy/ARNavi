@@ -7,6 +7,7 @@ using UnityEngine.XR.ARSubsystems;
 using ZXing;
 using Unity.Collections;
 using UnityEngine.UI;
+using TMPro;
 
 
 public class RecenterHelper : MonoBehaviour
@@ -14,16 +15,22 @@ public class RecenterHelper : MonoBehaviour
     [SerializeField] private ARSession session;
     [SerializeField] private XROrigin sessionOrigin;
     [SerializeField] private ARCameraManager cameraManager;
-    [SerializeField] private List<Target> targetList = new List<Target>();
-    [SerializeField] private Button calibrateButton;
+    [SerializeField] private GameObject recenterTargetsParent;
+    [SerializeField] private List<GameObject> recenterTargetList = new List<GameObject>();
+    [SerializeField] private TMP_Text calibrationText;
+    [SerializeField] private Image scanPanel;
 
     private Texture2D cameraImageTexture;
     private IBarcodeReader reader = new BarcodeReader();
     private string qrCodeResult;
+    private bool scanningEnabled = false;
     // Start is called before the first frame update
     void Start()
     {
-
+        foreach (Transform target in recenterTargetsParent.transform)
+        {
+            recenterTargetList.Add(target.gameObject);
+        }
     }
 
     // Update is called once per frame
@@ -42,11 +49,16 @@ public class RecenterHelper : MonoBehaviour
     }
     private void OnCameraFrameReceived(ARCameraFrameEventArgs eventArgs)
     {
+        if (!scanningEnabled)
+        {
+            return;
+        }
         if (!cameraManager.TryAcquireLatestCpuImage(out var cameraImage))
         {
             return;
         }
 
+        scanPanel.gameObject.SetActive(true);
         var conversionParams = new XRCpuImage.ConversionParams
         {
             inputRect = new RectInt(0, 0, cameraImage.width, cameraImage.height),
@@ -66,26 +78,52 @@ public class RecenterHelper : MonoBehaviour
         if (result != null)
         {
             qrCodeResult = result.Text;
-            calibrateButton.gameObject.SetActive(true);
+            calibrationText.text = "QR Code Detected: " + qrCodeResult;
+            SetQRCodeRecenterTarget();
         }
         else
         {
-            calibrateButton.gameObject.SetActive(false);
+            calibrationText.text = "No QR Code Detected";
         }
     }
 
     public void SetQRCodeRecenterTarget()
     {
-        foreach (var target in targetList)
+        Recenter(qrCodeResult);
+
+        scanningEnabled = false;
+        calibrationText.gameObject.SetActive(false);
+        scanPanel.gameObject.SetActive(false);
+    }
+    public void ToggleScanning()
+    {
+        scanningEnabled = !scanningEnabled;
+        if (scanningEnabled)
         {
-            if (target.targetName == qrCodeResult)
+            calibrationText.gameObject.SetActive(true);
+        }
+        else
+        {
+            calibrationText.gameObject.SetActive(false);
+        }
+    }
+    public void RecenterCurrentFloor()
+    {
+        // remove the spaces from the floor name
+        string currentFloorName = NavigationManager.Instance.currentFloor.name.Replace(" ", "");
+        string startPointName = currentFloorName + "StartPoint";
+        Recenter(startPointName);
+    }
+    private void Recenter(string targetName)
+    {
+        foreach (var target in recenterTargetList)
+        {
+            if (target.name == targetName)
             {
                 session.Reset();
-                sessionOrigin.transform.position = target.positionObj.transform.position;
-                sessionOrigin.transform.rotation = target.positionObj.transform.rotation;
+                sessionOrigin.transform.SetPositionAndRotation(target.transform.position, target.transform.rotation);
                 break;
             }
         }
-        calibrateButton.gameObject.SetActive(false);
     }
 }
