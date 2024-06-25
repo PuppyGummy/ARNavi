@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
-// using Niantic.Experimental.Lightship.AR.WorldPositioning;
+using Niantic.Experimental.Lightship.AR.WorldPositioning;
 using UnityEngine.XR.ARFoundation;
 using Unity.XR.CoreUtils;
 using UnityEngine.UI;
@@ -12,32 +12,28 @@ public class NavigationManager : MonoBehaviour
 {
     [SerializeField] private TMP_Dropdown targetListDropdown;
     [SerializeField] private TMP_Dropdown floorListDropdown;
-    // [SerializeField] private GameObject targetsParent;
     [SerializeField] private GameObject floorsParent;
     private List<GameObject> targetList = new List<GameObject>();
     private List<GameObject> floorList = new List<GameObject>();
     [SerializeField] private Camera topDownCamera;
-    private Vector3 targetPosition = Vector3.zero;
-    // [SerializeField] private TMP_Text statusText;
-    // [SerializeField] private TMP_Text lineToggleText;
+    public Vector3 targetPosition = Vector3.zero;
+    [SerializeField] private TMP_Text statusText;
     [SerializeField] private XROrigin sessionOrigin;
-    [SerializeField] private LineRenderer line;
-    // private ARWorldPositioningCameraHelper cameraHelper;
+    private ARWorldPositioningCameraHelper cameraHelper;
     [SerializeField] private ARCameraManager arCameraManager;
-    // [SerializeField] private ARWorldPositioningManager wpsManager;
+    [SerializeField] private ARWorldPositioningManager wpsManager;
     [SerializeField] private Button wallToggleButton;
     [SerializeField] private GameObject wallParent;
     [SerializeField] private Material defaultMaterial;
     [SerializeField] private Material occlusionMaterial;
-    [SerializeField] private Slider lineYOffsetSlider;
-    [SerializeField] public GameObject userIndicator;
+    public Slider lineYOffsetSlider;
+    public GameObject userIndicator;
     private bool wallToggle = false;
-    private NavMeshPath path;
+    public NavMeshPath path { get; private set; }
     private GameObject currentTarget;
-    public GameObject currentFloor;
-
-    // private bool lineToggle = false;
-    // Start is called before the first frame update
+    public GameObject currentFloor { get; private set; }
+    [SerializeField] private GameObject lineVisualization;
+    [SerializeField] private GameObject arrowVisualization;
 
     public static NavigationManager Instance;
     private void Awake()
@@ -70,50 +66,23 @@ public class NavigationManager : MonoBehaviour
     private void Start()
     {
         path = new NavMeshPath();
-        // line.enabled = lineToggle;
-        line.enabled = false;
-        // cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
+        cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
         SetMaterial(wallParent.transform, occlusionMaterial);
+        lineVisualization.SetActive(true);
+        arrowVisualization.SetActive(false);
 
         FillFloorDropdown();
         FillTargetDropdown();
     }
-
-    // Update is called once per frame
     private void Update()
     {
-        // if ((Input.touchCount > 0) && (Input.GetTouch(0).phase == TouchPhase.Began))
-        // {
-        //     lineToggle = !lineToggle;
-        // }
-        // statusText.text = "WPS: " + wpsManager.Status.ToString();
-        UpdateUserRotation();
+        statusText.text = "WPS: " + wpsManager.Status.ToString();
+        // UpdateUserRotation();
+        WorldPositionUpdate();
         if (targetPosition != Vector3.zero)
         {
-            // WorldPositionUpdate();
             NavMesh.CalculatePath(userIndicator.transform.position, targetPosition, NavMesh.AllAreas, path);
-            line.positionCount = path.corners.Length;
-            Vector3[] calculatedPosition = CalculateLineOffset();
-            line.SetPositions(calculatedPosition);
-            line.enabled = true;
         }
-        else
-        {
-            line.enabled = false;
-        }
-    }
-    private Vector3[] CalculateLineOffset()
-    {
-        if (lineYOffsetSlider.value == 0)
-        {
-            return path.corners;
-        }
-        Vector3[] calculatedPosition = new Vector3[path.corners.Length];
-        for (int i = 0; i < path.corners.Length; i++)
-        {
-            calculatedPosition[i] = path.corners[i] + new Vector3(0, lineYOffsetSlider.value, 0);
-        }
-        return calculatedPosition;
     }
     public void SetLineYOffsetText()
     {
@@ -131,19 +100,13 @@ public class NavigationManager : MonoBehaviour
         currentTarget.GetComponent<MeshRenderer>().enabled = true;
         targetPosition = currentTarget.transform.position;
     }
-    // private void WorldPositionUpdate()
-    // {
-    //     float heading = cameraHelper.TrueHeading;
-    //     transform.rotation = Quaternion.Euler(0, heading, 0);
-    // }
+    private void WorldPositionUpdate()
+    {
+        float heading = cameraHelper.TrueHeading;
+        userIndicator.transform.rotation = Quaternion.Euler(0, heading, 0);
+    }
     public void SetCurrentFloor()
     {
-        // int floorIndex = floorListDropdown.value;
-        // foreach (Transform floor in floorsParent.transform)
-        // {
-        //     floor.gameObject.SetActive(false);
-        // }
-        // floorsParent.transform.GetChild(floorIndex).gameObject.SetActive(true);
         targetList.Clear();
         currentTarget = null;
         targetPosition = Vector3.zero;
@@ -158,7 +121,7 @@ public class NavigationManager : MonoBehaviour
     {
         // Set the rotation according to the AR camera's rotation
         Quaternion originalRotation = userIndicator.transform.rotation;
-        userIndicator.transform.rotation = new Quaternion(originalRotation.x, arCameraManager.transform.rotation.y, originalRotation.z, originalRotation.w);
+        userIndicator.transform.rotation = new Quaternion(originalRotation.x, -arCameraManager.transform.rotation.y, originalRotation.z, originalRotation.w);
     }
     public void ToggleWall()
     {
@@ -211,5 +174,10 @@ public class NavigationManager : MonoBehaviour
             targetNames.Add(target.name);
         }
         targetListDropdown.AddOptions(targetNames);
+    }
+    public void SwitchVisual()
+    {
+        lineVisualization.SetActive(!lineVisualization.activeSelf);
+        arrowVisualization.SetActive(!arrowVisualization.activeSelf);
     }
 }

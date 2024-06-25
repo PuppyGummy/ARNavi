@@ -31,6 +31,7 @@ public class RecenterHelper : MonoBehaviour
         {
             recenterTargetList.Add(target.gameObject);
         }
+        Recenter("FirstFloorStartPoint");
     }
 
     // Update is called once per frame
@@ -58,7 +59,6 @@ public class RecenterHelper : MonoBehaviour
             return;
         }
 
-        scanPanel.gameObject.SetActive(true);
         var conversionParams = new XRCpuImage.ConversionParams
         {
             inputRect = new RectInt(0, 0, cameraImage.width, cameraImage.height),
@@ -101,10 +101,12 @@ public class RecenterHelper : MonoBehaviour
         if (scanningEnabled)
         {
             calibrationText.gameObject.SetActive(true);
+            scanPanel.gameObject.SetActive(true);
         }
         else
         {
             calibrationText.gameObject.SetActive(false);
+            scanPanel.gameObject.SetActive(false);
         }
     }
     public void RecenterCurrentFloor()
