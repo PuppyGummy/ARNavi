@@ -1,0 +1,118 @@
+{
+    "targets": [
+        {
+            "targetName": "Project Room 2",
+            "targetPosition": {
+                "x": -21.899999618530275,
+                "y": 1.0,
+                "z": -2.070000648498535
+            }
+        },
+        {
+            "targetName": "Project Room 3",
+            "targetPosition": {
+                "x": -21.850000381469728,
+                "y": 1.0,
+                "z": -13.460000991821289
+            }
+        },
+        {
+            "targetName": "Project room 8",
+            "targetPosition": {
+                "x": -3.939999580383301,
+                "y": 1.0,
+                "z": -13.570000648498536
+            }
+        },
+        {
+            "targetName": "Classroom A",
+            "targetPosition": {
+                "x": -25.689998626708986,
+                "y": 1.0,
+                "z": -5.940000534057617
+            }
+        },
+        {
+            "targetName": "Classroom B",
+            "targetPosition": {
+                "x": -25.689998626708986,
+                "y": 1.0,
+                "z": -9.890000343322754
+            }
+        }
+    ],
+    "floors": [
+        {
+            "floorName": "First Floor"
+        },
+        {
+            "floorName": "Second Floor"
+        }
+    ],
+    "recenterTargets": [
+        {
+            "targetName": "ProjRoom6",
+            "targetPosition": {
+                "x": -1.5599994659423829,
+                "y": 0.5,
+                "z": 0.20999908447265626
+            }
+        },
+        {
+            "targetName": "ProjRoom4",
+            "targetPosition": {
+                "x": -8.899999618530274,
+                "y": 0.5,
+                "z": -1.2299995422363282
+            }
+        },
+        {
+            "targetName": "Corridor(near Proj room 8)",
+            "targetPosition": {
+                "x": -4.439999580383301,
+                "y": 0.5,
+                "z": -8.410000801086426
+            }
+        },
+        {
+            "targetName": "Corridor(near Proj room 3)",
+            "targetPosition": {
+                "x": -21.239999771118165,
+                "y": 0.5,
+                "z": -8.450000762939454
+            }
+        },
+        {
+            "targetName": "ClassroomB",
+            "targetPosition": {
+                "x": -25.25,
+                "y": 0.5,
+                "z": -12.239999771118164
+            }
+        },
+        {
+            "targetName": "ClassroomA",
+            "targetPosition": {
+                "x": -25.25,
+                "y": 0.5,
+                "z": -3.8000001907348635
+            }
+        },
+        {
+            "targetName": "SecondFloorStartPoint",
+            "targetPosition": {
+                "x": 40.67000198364258,
+                "y": 0.0,
+                "z": -16.0
+            }
+        },
+        {
+            "targetName": "FirstFloorStartPoint",
+            "targetPosition": {
+                "x": -0.00099945068359375,
+                "y": 0.0,
+                "z": 0.00099945068359375
+            }
+        }
+    ]
+}

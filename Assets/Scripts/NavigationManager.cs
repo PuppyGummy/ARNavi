@@ -83,6 +83,10 @@ public class NavigationManager : MonoBehaviour
         {
             NavMesh.CalculatePath(userIndicator.transform.position, targetPosition, NavMesh.AllAreas, path);
         }
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            SaveCurrentMap();
+        }
     }
     public void SetLineYOffsetText()
     {
@@ -179,5 +183,41 @@ public class NavigationManager : MonoBehaviour
     {
         lineVisualization.SetActive(!lineVisualization.activeSelf);
         arrowVisualization.SetActive(!arrowVisualization.activeSelf);
+    }
+    private void SaveCurrentMap()
+    {
+        MapData data = new MapData
+        {
+            targets = new List<Target>(),
+            floors = new List<Floor>(),
+            recenterTargets = new List<Target>()
+        };
+        foreach (var target in targetList)
+        {
+            Target newTarget = new Target
+            {
+                targetName = target.name,
+                targetPosition = target.transform.position
+            };
+            data.targets.Add(newTarget);
+        }
+        foreach (var floor in floorList)
+        {
+            Floor newFloor = new Floor
+            {
+                floorName = floor.name
+            };
+            data.floors.Add(newFloor);
+        }
+        foreach (var recenterTarget in RecenterHelper.Instance.recenterTargetList)
+        {
+            Target newRecenterTarget = new Target
+            {
+                targetName = recenterTarget.name,
+                targetPosition = recenterTarget.transform.position
+            };
+            data.recenterTargets.Add(newRecenterTarget);
+        }
+        SaveLoadManager.SaveMap(data);
     }
 }
