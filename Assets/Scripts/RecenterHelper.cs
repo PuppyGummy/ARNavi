@@ -80,6 +80,7 @@ public class RecenterHelper : MonoBehaviour
             qrCodeResult = result.Text;
             calibrationText.text = "QR Code Detected: " + qrCodeResult;
             SetQRCodeRecenterTarget();
+            MascotController.Instance.SetMascotStartingPosition();
         }
         else
         {
