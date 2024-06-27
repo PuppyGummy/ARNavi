@@ -76,9 +76,9 @@ public class NavigationManager : MonoBehaviour
     }
     private void Update()
     {
-        statusText.text = "WPS: " + wpsManager.Status.ToString();
+        // statusText.text = "WPS: " + wpsManager.Status.ToString();
         // UpdateUserRotation();
-        WorldPositionUpdate();
+        // WorldPositionUpdate();
         if (targetPosition != Vector3.zero)
         {
             NavMesh.CalculatePath(userIndicator.transform.position, targetPosition, NavMesh.AllAreas, path);

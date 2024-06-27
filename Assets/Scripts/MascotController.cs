@@ -7,12 +7,18 @@ public class MascotController : MonoBehaviour
     [SerializeField] private float mascotDistanceAhead = 2.0f;
     [SerializeField] private float moveOnDistance = 1.0f;
     [SerializeField] private float smoothingFactor = 0.1f;
+    [SerializeField] private float moveTolerance = 0.1f;
+    [SerializeField] private float rotationSpeed = 1.5f;
+    [SerializeField] private float idelTime = 0.5f;
 
     private NavMeshPath path;
     private GameObject userIndicator;
     private NavMeshAgent agent;
     private Vector3[] pathOffset;
     private Animator animator;
+    private Vector3 currentPosition;
+    private bool setMascotAtFirstTime = false;
+    private float time;
 
     public static MascotController Instance;
     private void Awake()
@@ -44,17 +50,58 @@ public class MascotController : MonoBehaviour
         else
         {
             mascotTransform.gameObject.SetActive(true);
-            AddOffsetToPath();
-            UpdateMascotPosition();
+            if (!setMascotAtFirstTime)
+            {
+                AddOffsetToPath();
+                Vector3 nextCorner = SelectNextNavigationPointWithinDistance();
+                Vector3 direction = (nextCorner - userIndicator.transform.position).normalized;
+                Vector3 nextPosition = userIndicator.transform.position + direction * mascotDistanceAhead;
+                mascotTransform.position = nextPosition;
+                setMascotAtFirstTime = true;
+            }
+            if (UserMoved())
+            {
+                AddOffsetToPath();
+                UpdateMascotPosition();
+                time = Time.time;
+            }
+            else
+            {
+                // if the user is idle for a certain time, make mascot look at the user
+                if (Time.time - time > idelTime)
+                {
+                    // make mascot slowly look at the user
+                    mascotTransform.rotation = Quaternion.Slerp(mascotTransform.rotation, Quaternion.LookRotation(userIndicator.transform.position - mascotTransform.position), rotationSpeed * Time.deltaTime);
+                }
+            }
         }
     }
+    private bool UserMoved()
+    {
+        // if the user moved more than a certain distance, return true
+        if (Vector3.Distance(currentPosition, userIndicator.transform.position) > moveTolerance)
+        {
+            currentPosition = userIndicator.transform.position;
+            return true;
+        }
+        return false;
+    }
 
-    void UpdateMascotPosition()
+    private void UpdateMascotPosition()
     {
         Vector3 nextCorner = SelectNextNavigationPointWithinDistance();
-        Vector3 direction = (nextCorner - userIndicator.transform.position).normalized;
-        Vector3 nextPosition = userIndicator.transform.position + direction * mascotDistanceAhead;
-        agent.SetDestination(nextPosition);
+        // if the next corner is the target position, set the mascot's destination to the target position
+        if (nextCorner == NavigationManager.Instance.targetPosition)
+        {
+            agent.SetDestination(nextCorner);
+        }
+        else
+        {
+            Vector3 direction = (nextCorner - userIndicator.transform.position).normalized;
+            Vector3 nextPosition = userIndicator.transform.position + direction * mascotDistanceAhead;
+            agent.SetDestination(nextPosition);
+        }
+
         // if mascot is moving, play walk animation
         if (agent.velocity.magnitude > 0)
         {

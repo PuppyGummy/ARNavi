@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class checkPrefsForFirst : MonoBehaviour
+public class CheckPrefsForFirst : MonoBehaviour
 {
     // Start is called before the first frame update
     void Start()
