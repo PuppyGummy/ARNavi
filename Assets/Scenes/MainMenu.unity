@@ -2032,7 +2032,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1896195199}
         m_TargetAssemblyTypeName: NavigationButtons, Assembly-CSharp
-        m_MethodName: 
+        m_MethodName: ToNavigation
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
