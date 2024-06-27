@@ -835,7 +835,7 @@ GameObject:
   - component: {fileID: 62004770}
   m_Layer: 0
   m_Name: Project Room 3
-  m_TagString: Untagged
+  m_TagString: Project Room
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1374,7 +1374,7 @@ GameObject:
   - component: {fileID: 122607007}
   m_Layer: 0
   m_Name: Kitchen
-  m_TagString: Untagged
+  m_TagString: Other
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -4999,7 +4999,7 @@ GameObject:
   - component: {fileID: 650270776}
   m_Layer: 0
   m_Name: Classroom B
-  m_TagString: Untagged
+  m_TagString: Classroom
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6482,7 +6482,7 @@ GameObject:
   - component: {fileID: 914431145}
   m_Layer: 0
   m_Name: Project Room 2
-  m_TagString: Untagged
+  m_TagString: Project Room
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -10189,7 +10189,7 @@ GameObject:
   - component: {fileID: 1572851199}
   m_Layer: 0
   m_Name: Classroom A
-  m_TagString: Untagged
+  m_TagString: Classroom
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -10577,7 +10577,7 @@ GameObject:
   - component: {fileID: 1600712555}
   m_Layer: 0
   m_Name: Window
-  m_TagString: Untagged
+  m_TagString: Other
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -12818,7 +12818,7 @@ GameObject:
   - component: {fileID: 1998238896}
   m_Layer: 0
   m_Name: Project room 8
-  m_TagString: Untagged
+  m_TagString: Project Room
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -13260,7 +13260,7 @@ GameObject:
   - component: {fileID: 2085370496}
   m_Layer: 0
   m_Name: Bathroom
-  m_TagString: Untagged
+  m_TagString: Other
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

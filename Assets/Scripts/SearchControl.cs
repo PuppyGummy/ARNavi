@@ -26,10 +26,14 @@ public class SearchControl : MonoBehaviour
         "Kitchen"
     };
 
+    public void Start(){
+        TextInputOnChange();
+    }
     //when floor is changed update to only include options on that floor
     //initially floor 1 is selected by default
     //check the text input when floor is changed, filter by floor, then by text
     //when text is added, reset all dropdown options, then populate with ones that are similar to the text input
+
     public void TextInputOnChange()
     {
         //get appropriate list based on value of floor dropdown
@@ -48,6 +52,7 @@ public class SearchControl : MonoBehaviour
         //populate target dropdown with sublist
         targetListDropdown.ClearOptions();
         List<string> finalTargets = new List<string>();
+        finalTargets.Add(input + "...");
         foreach (string target in filteredEntries)
         {
             finalTargets.Add(target);
@@ -58,9 +63,12 @@ public class SearchControl : MonoBehaviour
     }
 
     public void OnTargetChoice() {
-        //get the text of the choice chosen in dropdown and changes the current search to match it
-
+        //get the text of the choice chosen in dropdown and changes the current search to match 
         userSearch.text = targetListDropdown.captionText.text;
+    }
+
+    public void OnFloorSelect() {
+        TextInputOnChange();
     }
 
 }
