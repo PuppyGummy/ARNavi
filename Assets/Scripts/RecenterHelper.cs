@@ -16,7 +16,7 @@ public class RecenterHelper : MonoBehaviour
     [SerializeField] private XROrigin sessionOrigin;
     [SerializeField] private ARCameraManager cameraManager;
     [SerializeField] private GameObject recenterTargetsParent;
-    [SerializeField] private List<GameObject> recenterTargetList = new List<GameObject>();
+    public List<GameObject> recenterTargetList = new List<GameObject>();
     [SerializeField] private TMP_Text calibrationText;
     [SerializeField] private Image scanPanel;
 
@@ -24,6 +24,19 @@ public class RecenterHelper : MonoBehaviour
     private IBarcodeReader reader = new BarcodeReader();
     private string qrCodeResult;
     private bool scanningEnabled = false;
+    public static RecenterHelper Instance;
+    private void Awake()
+    {
+        // Singleton pattern
+        if (Instance != null)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+
+        Instance = this;
+        GameObject.DontDestroyOnLoad(this.gameObject);
+    }
     // Start is called before the first frame update
     void Start()
     {
@@ -31,6 +44,7 @@ public class RecenterHelper : MonoBehaviour
         {
             recenterTargetList.Add(target.gameObject);
         }
+        Recenter("FirstFloorStartPoint");
     }
 
     // Update is called once per frame
@@ -58,7 +72,6 @@ public class RecenterHelper : MonoBehaviour
             return;
         }
 
-        scanPanel.gameObject.SetActive(true);
         var conversionParams = new XRCpuImage.ConversionParams
         {
             inputRect = new RectInt(0, 0, cameraImage.width, cameraImage.height),
@@ -80,6 +93,7 @@ public class RecenterHelper : MonoBehaviour
             qrCodeResult = result.Text;
             calibrationText.text = "QR Code Detected: " + qrCodeResult;
             SetQRCodeRecenterTarget();
+            MascotController.Instance.SetMascotStartingPosition();
         }
         else
         {
@@ -101,10 +115,12 @@ public class RecenterHelper : MonoBehaviour
         if (scanningEnabled)
         {
             calibrationText.gameObject.SetActive(true);
+            scanPanel.gameObject.SetActive(true);
         }
         else
         {
             calibrationText.gameObject.SetActive(false);
+            scanPanel.gameObject.SetActive(false);
         }
     }
     public void RecenterCurrentFloor()
