@@ -13,10 +13,4 @@ public class checkPrefsForFirst : MonoBehaviour
             SceneManager.LoadScene("Get Started");
         }
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

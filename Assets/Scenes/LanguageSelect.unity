@@ -1632,8 +1632,8 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 572339351}
-        m_TargetAssemblyTypeName: navigationButtons, Assembly-CSharp
-        m_MethodName: toMainMenu
+        m_TargetAssemblyTypeName: NavigationButtons, Assembly-CSharp
+        m_MethodName: ToMainMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
