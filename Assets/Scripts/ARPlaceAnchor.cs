@@ -29,9 +29,20 @@ public class ARPlaceAnchor : MonoBehaviour
         set => m_Prefab = value;
     }
 
+    public static ARPlaceAnchor Instance { get; private set; }
+
     private void Awake()
     {
         raycastManager = GetComponent<ARRaycastManager>();
+
+        if (Instance != null)
+        {
+            Destroy(this.gameObject);
+            return;
+        }
+
+        Instance = this;
+        GameObject.DontDestroyOnLoad(this.gameObject);
     }
 
     public void RemoveAllAnchors()
@@ -158,6 +169,14 @@ public class ARPlaceAnchor : MonoBehaviour
 
                 m_Anchors.Add(anchor);
             }
+        }
+    }
+    public void HandleLoadedAnchors()
+    {
+        foreach (var anchor in anchorManager.trackables)
+        {
+            Debug.Log($"Anchor loaded: {anchor.trackableId}");
+            Instantiate(m_Prefab, anchor.transform.position, anchor.transform.rotation);
         }
     }
 }
