@@ -1,52 +1,86 @@
 {
-    "targets": [
-        {
-            "targetName": "Project Room 2",
-            "targetPosition": {
-                "x": -21.899999618530275,
-                "y": 1.0,
-                "z": -2.070000648498535
-            }
-        },
-        {
-            "targetName": "Project Room 3",
-            "targetPosition": {
-                "x": -21.850000381469728,
-                "y": 1.0,
-                "z": -13.460000991821289
-            }
-        },
-        {
-            "targetName": "Project room 8",
-            "targetPosition": {
-                "x": -3.939999580383301,
-                "y": 1.0,
-                "z": -13.570000648498536
-            }
-        },
-        {
-            "targetName": "Classroom A",
-            "targetPosition": {
-                "x": -25.689998626708986,
-                "y": 1.0,
-                "z": -5.940000534057617
-            }
-        },
-        {
-            "targetName": "Classroom B",
-            "targetPosition": {
-                "x": -25.689998626708986,
-                "y": 1.0,
-                "z": -9.890000343322754
-            }
-        }
-    ],
     "floors": [
         {
-            "floorName": "First Floor"
+            "floorName": "First Floor",
+            "targetsOnFloor": [
+                {
+                    "targetName": "Project Room 3",
+                    "targetPosition": {
+                        "x": -21.850000381469728,
+                        "y": 1.0,
+                        "z": -13.460000991821289
+                    },
+                    "tag": "Project Room"
+                },
+                {
+                    "targetName": "Project Room 2",
+                    "targetPosition": {
+                        "x": -21.899999618530275,
+                        "y": 1.0,
+                        "z": -2.070000648498535
+                    },
+                    "tag": "Project Room"
+                },
+                {
+                    "targetName": "Project room 8",
+                    "targetPosition": {
+                        "x": -3.939999580383301,
+                        "y": 1.0,
+                        "z": -13.570000648498536
+                    },
+                    "tag": "Project Room"
+                },
+                {
+                    "targetName": "Classroom A",
+                    "targetPosition": {
+                        "x": -25.689998626708986,
+                        "y": 1.0,
+                        "z": -5.940000534057617
+                    },
+                    "tag": "Classroom"
+                },
+                {
+                    "targetName": "Classroom B",
+                    "targetPosition": {
+                        "x": -25.689998626708986,
+                        "y": 1.0,
+                        "z": -9.890000343322754
+                    },
+                    "tag": "Classroom"
+                }
+            ]
         },
         {
-            "floorName": "Second Floor"
+            "floorName": "Second Floor",
+            "targetsOnFloor": [
+                {
+                    "targetName": "Window",
+                    "targetPosition": {
+                        "x": 58.34000015258789,
+                        "y": 1.0,
+                        "z": -17.130001068115236
+                    },
+                    "tag": "Other"
+                },
+                {
+                    "targetName": "Bathroom",
+                    "targetPosition": {
+                        "x": 43.20000076293945,
+                        "y": 1.0,
+                        "z": -19.440000534057618
+                    },
+                    "tag": "Other"
+                },
+                {
+                    "targetName": "Kitchen",
+                    "targetPosition": {
+                        "x": 44.25,
+                        "y": 1.0,
+                        "z": -15.600000381469727
+                    },
+                    "tag": "Other"
+                }
+            ]
         }
     ],
     "recenterTargets": [
@@ -56,7 +90,8 @@
                 "x": -1.5599994659423829,
                 "y": 0.5,
                 "z": 0.20999908447265626
-            }
+            },
+            "tag": ""
         },
         {
             "targetName": "ProjRoom4",
@@ -64,7 +99,8 @@
                 "x": -8.899999618530274,
                 "y": 0.5,
                 "z": -1.2299995422363282
-            }
+            },
+            "tag": ""
         },
         {
             "targetName": "Corridor(near Proj room 8)",
@@ -72,7 +108,8 @@
                 "x": -4.439999580383301,
                 "y": 0.5,
                 "z": -8.410000801086426
-            }
+            },
+            "tag": ""
         },
         {
             "targetName": "Corridor(near Proj room 3)",
@@ -80,7 +117,8 @@
                 "x": -21.239999771118165,
                 "y": 0.5,
                 "z": -8.450000762939454
-            }
+            },
+            "tag": ""
         },
         {
             "targetName": "ClassroomB",
@@ -88,7 +126,8 @@
                 "x": -25.25,
                 "y": 0.5,
                 "z": -12.239999771118164
-            }
+            },
+            "tag": ""
         },
         {
             "targetName": "ClassroomA",
@@ -96,7 +135,8 @@
                 "x": -25.25,
                 "y": 0.5,
                 "z": -3.8000001907348635
-            }
+            },
+            "tag": ""
         },
         {
             "targetName": "SecondFloorStartPoint",
@@ -104,7 +144,8 @@
                 "x": 40.67000198364258,
                 "y": 0.0,
                 "z": -16.0
-            }
+            },
+            "tag": ""
         },
         {
             "targetName": "FirstFloorStartPoint",
@@ -112,7 +153,8 @@
                 "x": -0.00099945068359375,
                 "y": 0.0,
                 "z": 0.00099945068359375
-            }
+            },
+            "tag": ""
         }
     ]
 }
