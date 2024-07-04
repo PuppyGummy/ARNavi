@@ -20,9 +20,16 @@ public class Floor
 {
     public string floorName;
 }
-// [Serializable]
-// public class RecenterTarget
-// {
-//     public string recenterTargetName;
-//     public Vector3 recenterTargetPosition;
-// }
+
+[Serializable]
+public class AnchorData
+{
+    public float[] position;
+    public float[] rotation;
+}
+
+[Serializable]
+public class AnchorDataList
+{
+    public List<AnchorData> anchors = new List<AnchorData>();
+}

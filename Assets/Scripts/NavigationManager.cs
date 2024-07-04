@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
-using Niantic.Experimental.Lightship.AR.WorldPositioning;
+// using Niantic.Experimental.Lightship.AR.WorldPositioning;
 using UnityEngine.XR.ARFoundation;
 using Unity.XR.CoreUtils;
 using UnityEngine.UI;
@@ -19,9 +19,9 @@ public class NavigationManager : MonoBehaviour
     public Vector3 targetPosition = Vector3.zero;
     [SerializeField] private TMP_Text statusText;
     [SerializeField] private XROrigin sessionOrigin;
-    private ARWorldPositioningCameraHelper cameraHelper;
+    // private ARWorldPositioningCameraHelper cameraHelper;
     [SerializeField] private ARCameraManager arCameraManager;
-    [SerializeField] private ARWorldPositioningManager wpsManager;
+    // [SerializeField] private ARWorldPositioningManager wpsManager;
     [SerializeField] private Button wallToggleButton;
     [SerializeField] private GameObject wallParent;
     [SerializeField] private Material defaultMaterial;
@@ -66,7 +66,7 @@ public class NavigationManager : MonoBehaviour
     private void Start()
     {
         path = new NavMeshPath();
-        cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
+        // cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
         SetMaterial(wallParent.transform, occlusionMaterial);
         lineVisualization.SetActive(true);
         arrowVisualization.SetActive(false);
@@ -104,11 +104,11 @@ public class NavigationManager : MonoBehaviour
         currentTarget.GetComponent<MeshRenderer>().enabled = true;
         targetPosition = currentTarget.transform.position;
     }
-    private void WorldPositionUpdate()
-    {
-        float heading = cameraHelper.TrueHeading;
-        userIndicator.transform.rotation = Quaternion.Euler(0, heading, 0);
-    }
+    // private void WorldPositionUpdate()
+    // {
+    //     float heading = cameraHelper.TrueHeading;
+    //     userIndicator.transform.rotation = Quaternion.Euler(0, heading, 0);
+    // }
     public void SetCurrentFloor()
     {
         targetList.Clear();
