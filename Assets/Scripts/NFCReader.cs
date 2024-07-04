@@ -1,29 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using distriqt.plugins.nfc;
+using DigitsNFCToolkit;
 
 public class NFCReader : MonoBehaviour
 {
     public TMPro.TextMeshProUGUI text;
-    private bool readerModeEnabled = false;
     // Start is called before the first frame update
     void Start()
     {
-        if (NFC.isSupported)
-        {
-            text.text = "NFC is supported on this device";
-            NFC.Instance.OnNdefDiscovered += OnNdefDiscovered;
-
-            ScanOptions options = new ScanOptions();
-            options.message = "Hold your device near the NFC tag to calibrate";
-
-            NFC.Instance.RegisterForegroundDispatch(options);
-        }
-        else
-        {
-            text.text = "NFC is not supported on this device";
-        }
+#if (!UNITY_EDITOR)
+        NativeNFCManager.AddNDEFReadFinishedListener(OnNDEFReadFinished);
+        Debug.Log("NDEF Read Supported: " + NativeNFCManager.IsNDEFReadSupported());
+#endif
     }
 
     // Update is called once per frame
@@ -31,39 +20,22 @@ public class NFCReader : MonoBehaviour
     {
 
     }
-
-    void OnNdefDiscovered(NFCEvent e)
+    public void StartNFCRead()
     {
-        foreach (NdefMessage message in e.tag.messages)
-        {
-            foreach (NdefRecord record in message.records)
-            {
-                text.text = "Payload: " + StringToASCII(record.payload);
-            }
-        }
+#if (!UNITY_EDITOR)
+			NativeNFCManager.ResetOnTimeout = true;
+			NativeNFCManager.Enable();
+#endif
     }
-    public static string StringToASCII(string hexString)
+    public void OnNDEFReadFinished(NDEFReadResult result)
     {
-        string ascii = string.Empty;
-        for (int i = 0; i < hexString.Length; i += 2)
+        if (result.Success)
         {
-            byte val = System.Convert.ToByte(hexString.Substring(i, 2), 16);
-            char character = System.Convert.ToChar(val);
-            ascii += character;
-        }
-        return ascii;
-    }
-    public void ToggleNFC()
-    {
-        if (readerModeEnabled)
-        {
-            NFC.Instance.EnableReaderMode();
-            readerModeEnabled = false;
-        }
-        else
-        {
-            NFC.Instance.DisableReaderMode();
-            readerModeEnabled = true;
+            List<NDEFRecord> records = result.Message.Records;
+            NDEFRecord record = records[0];
+            TextRecord textRecord = (TextRecord)record;
+            RecenterHelper.Instance.Recenter(textRecord.text);
+            text.text = "NFC Tag Detected: " + textRecord.text;
         }
     }
 }

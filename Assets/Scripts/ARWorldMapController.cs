@@ -44,6 +44,8 @@ namespace UnityEngine.XR.ARFoundation.Samples
 
         static string path => Path.Combine(Application.persistentDataPath, "my_session.worldmap");
 
+        public static ARWorldMapController Instance { get; private set; }
+
         bool supported
         {
             get
@@ -190,9 +192,18 @@ namespace UnityEngine.XR.ARFoundation.Samples
         void Awake()
         {
             m_LogMessages = new List<string>();
+
+            if (Instance != null)
+            {
+                Destroy(this.gameObject);
+                return;
+            }
+
+            Instance = this;
+            GameObject.DontDestroyOnLoad(this.gameObject);
         }
 
-        void Log(string logMessage)
+        public void Log(string logMessage)
         {
             m_LogMessages.Add(logMessage);
         }

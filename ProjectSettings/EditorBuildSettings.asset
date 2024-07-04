@@ -50,6 +50,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Samples/WPS/Scenes/CompassScene.unity
     guid: f036d5120f667497d9097f9e60b22d7f
+  - enabled: 0
+    path: Assets/DigitsNFCToolkit/Samples/Scenes/NFCTools.unity
+    guid: befa626c478f23b4cb9ead522d1c55fb
   - enabled: 1
     path: Assets/Scenes/Welcome.unity
     guid: 950750146ffae8d4da3277760044d151

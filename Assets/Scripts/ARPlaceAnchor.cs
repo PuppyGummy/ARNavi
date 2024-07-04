@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using Unity.XR.CoreUtils;
 using UnityEngine;
 using UnityEngine.XR.ARFoundation;
+using UnityEngine.XR.ARFoundation.Samples;
+using UnityEngine.EventSystems;
 
 public class ARPlaceAnchor : MonoBehaviour
 {
@@ -72,6 +74,10 @@ public class ARPlaceAnchor : MonoBehaviour
             Touch touch = Input.GetTouch(0);
             if (touch.phase == TouchPhase.Began)
             {
+                if (IsPointerOverUIObject(touch))
+                {
+                    return;
+                }
                 List<ARRaycastHit> hits = new List<ARRaycastHit>();
                 if (raycastManager.Raycast(touch.position, hits))
                 {
@@ -79,6 +85,14 @@ public class ARPlaceAnchor : MonoBehaviour
                 }
             }
         }
+    }
+    private bool IsPointerOverUIObject(Touch touch)
+    {
+        PointerEventData eventDataCurrentPosition = new PointerEventData(EventSystem.current);
+        eventDataCurrentPosition.position = new Vector2(touch.position.x, touch.position.y);
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
+        return results.Count > 0;
     }
 
     void CreateAnchor(ARRaycastHit arRaycastHit)
@@ -175,7 +189,7 @@ public class ARPlaceAnchor : MonoBehaviour
     {
         foreach (var anchor in anchorManager.trackables)
         {
-            Debug.Log($"Anchor loaded: {anchor.trackableId}");
+            ARWorldMapController.Instance.Log($"Anchor loaded: {anchor.trackableId}");
             Instantiate(m_Prefab, anchor.transform.position, anchor.transform.rotation);
         }
     }

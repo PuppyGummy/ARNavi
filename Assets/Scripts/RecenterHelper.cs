@@ -129,7 +129,7 @@ public class RecenterHelper : MonoBehaviour
         string startPointName = currentFloorName + "StartPoint";
         Recenter(startPointName);
     }
-    private void Recenter(string targetName)
+    public void Recenter(string targetName)
     {
         foreach (var target in recenterTargetList)
         {
