@@ -111,6 +111,8 @@ namespace UnityEngine.XR.ARFoundation.Samples
             var worldMap = request.GetWorldMap();
             request.Dispose();
 
+            ARPlaceAnchor.Instance.SaveAnchors();
+
             SaveAndDisposeWorldMap(worldMap);
         }
 
@@ -185,7 +187,7 @@ namespace UnityEngine.XR.ARFoundation.Samples
 
             yield return new WaitUntil(() => ARSession.state == ARSessionState.SessionTracking);
             Log("Loading anchors...");
-            ARPlaceAnchor.Instance.HandleLoadedAnchors();
+            ARPlaceAnchor.Instance.LoadAnchors();
         }
 #endif
 

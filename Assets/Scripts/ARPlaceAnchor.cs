@@ -15,9 +15,15 @@ public class ARPlaceAnchor : MonoBehaviour
     [Tooltip("The prefab to be instantiated for each anchor.")]
     GameObject m_Prefab;
 
-    ARRaycastManager raycastManager;
+    private ARRaycastManager raycastManager;
 
-    List<ARAnchor> m_Anchors = new();
+    private List<ARAnchor> m_Anchors = new();
+    public List<GameObject> contents = new List<GameObject>();
+    public GameObject contentParent;
+    private int contentIndex = 0;
+    private float contentHeight = 0.8f;
+    private AnchorDataList anchorDataList = new AnchorDataList();
+
 
     public ARAnchorManager anchorManager
     {
@@ -102,37 +108,51 @@ public class ARPlaceAnchor : MonoBehaviour
         // If we hit a plane, try to "attach" the anchor to the plane
         if (m_AnchorManager.descriptor.supportsTrackableAttachments && arRaycastHit.trackable is ARPlane plane)
         {
-            if (m_Prefab != null)
+            if (contents != null && contentIndex < contents.Count)
             {
                 var oldPrefab = m_AnchorManager.anchorPrefab;
-                m_AnchorManager.anchorPrefab = m_Prefab;
-                anchor = m_AnchorManager.AttachAnchor(plane, arRaycastHit.pose);
+                m_AnchorManager.anchorPrefab = contents[contentIndex];
+                anchor = m_AnchorManager.AttachAnchor(plane, new Pose(new Vector3(arRaycastHit.pose.position.x, contentHeight, arRaycastHit.pose.position.z), Quaternion.Euler(0, 90, 0)));
                 m_AnchorManager.anchorPrefab = oldPrefab;
+                AnchorData anchorData = new AnchorData
+                {
+                    anchorID = anchor.trackableId.ToString(),
+                    contentIndex = contentIndex,
+                };
+                anchorDataList.anchors.Add(anchorData);
+                contentIndex++;
             }
             else
             {
-                anchor = m_AnchorManager.AttachAnchor(plane, arRaycastHit.pose);
+                anchor = m_AnchorManager.AttachAnchor(plane, new Pose(new Vector3(arRaycastHit.pose.position.x, contentHeight, arRaycastHit.pose.position.z), Quaternion.Euler(0, 90, 0)));
             }
 
             // FinalizePlacedAnchor(anchor, $"Attached to plane {plane.trackableId}");
+            anchor.transform.SetParent(contentParent.transform);
             m_Anchors.Add(anchor);
             return;
         }
 
         // Otherwise, just create a regular anchor at the hit pose
-        if (m_Prefab != null)
+        if (contents != null)
         {
-            // Note: the anchor can be anywhere in the scene hierarchy
-            var anchorPrefab = Instantiate(m_Prefab, arRaycastHit.pose.position, arRaycastHit.pose.rotation);
+            var anchorPrefab = Instantiate(contents[contentIndex], new Vector3(arRaycastHit.pose.position.x, contentHeight, arRaycastHit.pose.position.z), Quaternion.Euler(0, 90, 0));
             anchor = ComponentUtils.GetOrAddIf<ARAnchor>(anchorPrefab, true);
+            AnchorData anchorData = new AnchorData
+            {
+                anchorID = anchor.trackableId.ToString(),
+                contentIndex = contentIndex,
+            };
+            anchorDataList.anchors.Add(anchorData);
+            contentIndex++;
         }
         else
         {
             var anchorPrefab = new GameObject("Anchor");
-            anchorPrefab.transform.SetPositionAndRotation(arRaycastHit.pose.position, arRaycastHit.pose.rotation);
+            anchorPrefab.transform.SetPositionAndRotation(new Vector3(arRaycastHit.pose.position.x, contentHeight, arRaycastHit.pose.position.z), Quaternion.Euler(0, 90, 0));
             anchor = anchorPrefab.AddComponent<ARAnchor>();
         }
-
+        anchor.transform.SetParent(contentParent.transform);
         // FinalizePlacedAnchor(anchor, $"Anchor (from {arRaycastHit.hitType})");
         m_Anchors.Add(anchor);
     }
@@ -148,17 +168,8 @@ public class ARPlaceAnchor : MonoBehaviour
     // }
     public void SaveAnchors()
     {
-        AnchorDataList anchorDataList = new AnchorDataList();
-        foreach (var anchor in m_Anchors)
-        {
-            AnchorData anchorData = new AnchorData
-            {
-                position = new float[] { anchor.transform.position.x, anchor.transform.position.y, anchor.transform.position.z },
-                rotation = new float[] { anchor.transform.rotation.x, anchor.transform.rotation.y, anchor.transform.rotation.z, anchor.transform.rotation.w }
-            };
-            anchorDataList.anchors.Add(anchorData);
-        }
         SaveLoadManager.SaveAnchors(anchorDataList);
+        
     }
     public void LoadAnchors()
     {
@@ -167,30 +178,19 @@ public class ARPlaceAnchor : MonoBehaviour
         {
             foreach (var anchorData in anchorDataList.anchors)
             {
-                ARAnchor anchor;
-
-                if (m_Prefab != null)
+                foreach (var anchor in anchorManager.trackables)
                 {
-                    var anchorPrefab = Instantiate(m_Prefab, new Vector3(anchorData.position[0], anchorData.position[1], anchorData.position[2]), new Quaternion(anchorData.rotation[0], anchorData.rotation[1], anchorData.rotation[2], anchorData.rotation[3]));
-                    anchor = ComponentUtils.GetOrAddIf<ARAnchor>(anchorPrefab, true);
+                    if (anchor.trackableId.ToString() == anchorData.anchorID)
+                    {
+                        if (contents != null)
+                        {
+                            Instantiate(contents[anchorData.contentIndex], anchor.transform.position, anchor.transform.rotation);
+                        }
+                        m_Anchors.Add(anchor);
+                        break;
+                    }
                 }
-                else
-                {
-                    var anchorPrefab = new GameObject("Anchor");
-                    anchorPrefab.transform.SetPositionAndRotation(new Vector3(anchorData.position[0], anchorData.position[1], anchorData.position[2]), new Quaternion(anchorData.rotation[0], anchorData.rotation[1], anchorData.rotation[2], anchorData.rotation[3]));
-                    anchor = anchorPrefab.AddComponent<ARAnchor>();
-                }
-
-                m_Anchors.Add(anchor);
             }
-        }
-    }
-    public void HandleLoadedAnchors()
-    {
-        foreach (var anchor in anchorManager.trackables)
-        {
-            ARWorldMapController.Instance.Log($"Anchor loaded: {anchor.trackableId}");
-            Instantiate(m_Prefab, anchor.transform.position, anchor.transform.rotation);
         }
     }
 }

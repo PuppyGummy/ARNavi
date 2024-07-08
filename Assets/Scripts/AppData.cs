@@ -24,8 +24,8 @@ public class Floor
 [Serializable]
 public class AnchorData
 {
-    public float[] position;
-    public float[] rotation;
+    public string anchorID;
+    public int contentIndex;
 }
 
 [Serializable]
