@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18018535, g: 0.22559482, b: 0.30677685, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028334, g: 0.22571337, b: 0.3069219, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -830,12 +830,11 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 62004773}
-  - component: {fileID: 62004772}
   - component: {fileID: 62004771}
   - component: {fileID: 62004770}
   m_Layer: 0
   m_Name: Project Room 3
-  m_TagString: Project Room
+  m_TagString: Medical
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -861,8 +860,8 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 62004769}
   m_Enabled: 0
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
+  m_CastShadows: 0
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
@@ -873,7 +872,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 188547f47296e46c8b9a61ec281b1288, type: 2}
+  - {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -895,16 +894,8 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!33 &62004772
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 62004769}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!4 &62004773
-Transform:
+--- !u!224 &62004773
+RectTransform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -918,6 +909,11 @@ Transform:
   m_Father: {fileID: 919861071}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -4.4400005, y: 1}
+  m_SizeDelta: {x: 20, y: 5}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &84148727
 GameObject:
   m_ObjectHideFlags: 0
@@ -1374,7 +1370,7 @@ GameObject:
   - component: {fileID: 122607007}
   m_Layer: 0
   m_Name: Kitchen
-  m_TagString: Other
+  m_TagString: Fun
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -5504,6 +5500,7 @@ GameObject:
   - component: {fileID: 627852121}
   - component: {fileID: 627852120}
   - component: {fileID: 627852119}
+  - component: {fileID: 627852122}
   m_Layer: 0
   m_Name: EventSystem
   m_TagString: Untagged
@@ -5561,6 +5558,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &627852122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 627852118}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1aa00b13accc2814ca07aba4d6565888, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &650270773
 GameObject:
   m_ObjectHideFlags: 0
@@ -5575,7 +5584,7 @@ GameObject:
   - component: {fileID: 650270776}
   m_Layer: 0
   m_Name: Classroom B
-  m_TagString: Classroom
+  m_TagString: Amenities
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7228,7 +7237,7 @@ GameObject:
   - component: {fileID: 914431145}
   m_Layer: 0
   m_Name: Project Room 2
-  m_TagString: Project Room
+  m_TagString: Medical
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7246,7 +7255,7 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 919861071}
-  m_RootOrder: 0
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &914431145
 BoxCollider:
@@ -7339,6 +7348,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 62004773}
   - {fileID: 914431144}
   - {fileID: 62004773}
   - {fileID: 1998238895}
@@ -11645,7 +11655,7 @@ GameObject:
   - component: {fileID: 1572851199}
   m_Layer: 0
   m_Name: Classroom A
-  m_TagString: Classroom
+  m_TagString: Amenities
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -12168,7 +12178,7 @@ GameObject:
   - component: {fileID: 1600712555}
   m_Layer: 0
   m_Name: Window
-  m_TagString: Other
+  m_TagString: Fun
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -14761,7 +14771,7 @@ GameObject:
   - component: {fileID: 1998238896}
   m_Layer: 0
   m_Name: Project room 8
-  m_TagString: Project Room
+  m_TagString: Medical
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -15338,7 +15348,7 @@ GameObject:
   - component: {fileID: 2085370496}
   m_Layer: 0
   m_Name: Bathroom
-  m_TagString: Other
+  m_TagString: Fun
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
