@@ -8,6 +8,10 @@ TagManager:
   - Project Room
   - Classroom
   - Other
+  - Medical
+  - Facilities
+  - Fun
+  - Amenities
   layers:
   - Default
   - TransparentFX

@@ -18,6 +18,9 @@ public class SearchControl : MonoBehaviour
     [SerializeField] private TMP_Dropdown floorListDropdown;
     [SerializeField] private TMP_InputField userSearch;
 
+    [SerializeField] private Toggle funToggle;
+    [SerializeField] private Toggle amenitiesToggle;
+    [SerializeField] private Toggle medToggle;
 
 
 
@@ -33,13 +36,7 @@ public class SearchControl : MonoBehaviour
     private static Floor currentFloor;
 
    
-    public void Awake()
-    {
-        
-
-      
-     
-    }
+    
 
     public void Start()
     {
@@ -53,6 +50,7 @@ public class SearchControl : MonoBehaviour
         userSearch.text = currentTarget.targetName;
         FillFloorDropdown();
         FillTargetDropdown();
+        userSearch.text = "";
 
         InstantiateSearchResults();
     }
@@ -63,6 +61,8 @@ public class SearchControl : MonoBehaviour
             GameObject.Destroy(child.gameObject);
         }
 
+        
+
         foreach (Target target in targets)
         {
             GameObject newButton = Instantiate(searchResultPrefab, searchResultsHolder.transform);
@@ -72,6 +72,63 @@ public class SearchControl : MonoBehaviour
 
             
         }
+    }
+
+    public void OnToggleChange()
+    {
+
+        List<string> entriesByFloor = new List<string>();
+        //get targets of current floor
+        List<Target> targetsByFloor = targetList.floors[floorListDropdown.value].targetsOnFloor;
+        foreach (Target target in targetsByFloor)
+        {
+            entriesByFloor.Add(target.targetName);
+        }
+
+        //get appropriate sublist based on similarity to text input
+        string input = userSearch.text;
+        //List<string> filteredEntries = entriesByFloor.Where(s => s.ToLower().StartsWith(input.ToLower())).ToList();
+
+
+        List<Target> newTargets = targetsByFloor.Where(s => s.targetName.ToLower().StartsWith(input.ToLower())).ToList();
+
+
+        List<Target> filteredTargets = new List<Target>();
+        
+        foreach(Target target in newTargets)
+        {
+            if (funToggle.isOn && target.tag == "Fun")
+            {
+                filteredTargets.Add(target);
+            }
+            if(medToggle.isOn && target.tag == "Medical")
+            {
+                filteredTargets.Add(target);
+            }
+            if(amenitiesToggle.isOn && target.tag == "Amenities")
+            {
+                filteredTargets.Add(target);
+            }
+        }
+        //if no filters are on, just display all targets on the current floor
+        if(!funToggle.isOn && !medToggle.isOn && !amenitiesToggle.isOn)
+        {
+            foreach(Target target in newTargets)
+            {
+                filteredTargets.Add(target);
+            }
+        }
+        
+        targets = filteredTargets;
+        foreach(Target target in targets)
+        {
+            Debug.Log(target.targetName);
+        }
+        
+        FillTargetDropdown();
+        
+        InstantiateSearchResults();
+
     }
 
     
@@ -86,6 +143,7 @@ public class SearchControl : MonoBehaviour
         targetListDropdown.ClearOptions();
         List<string> targetNames = new List<string>();
         targetNames.Add(userSearch.text + "...");
+        
         foreach (Target target in targets)
         {
             targetNames.Add(target.targetName);
@@ -126,20 +184,24 @@ public class SearchControl : MonoBehaviour
        
 
         List<Target> newTargets =  targetsByFloor.Where(s => s.targetName.ToLower().StartsWith(input.ToLower())).ToList();
+        
         targets = newTargets;
+        OnToggleChange();
         FillTargetDropdown();
 
         
+
         targetListDropdown.Show();
         InstantiateSearchResults();
-
     }
 
     public void OnTargetChoice()
     {
+        
         //get the text of the choice chosen in dropdown and changes the current search to match 
         userSearch.text = targetListDropdown.captionText.text;
         //change currentTarget to match
+       
         foreach(Target target in targets)
         {
             if (target.targetName == targetListDropdown.captionText.text)
@@ -155,6 +217,8 @@ public class SearchControl : MonoBehaviour
         currentFloor = floors[floorListDropdown.value];
         //set the targets to the current floor's targets
         targets = currentFloor.targetsOnFloor;
+        //check the filters
+    
         FillTargetDropdown();
         InstantiateSearchResults();
     }
@@ -193,14 +257,5 @@ public class SearchControl : MonoBehaviour
     }
 
     //Create search result buttons
-    /*
-    public void CreateSearchResults()
-    {
-        create buttons
-            can make a button prefab with the sprite and spawn them in in the viewport
-        should be children of the viewport (under the scroll view)
-        sprite?
-    }
-     */
    
 }
