@@ -230,20 +230,20 @@ namespace UnityEngine.XR.ARFoundation.Samples
 
         void Update()
         {
-            if (supported)
-            {
-                SetActive(m_ErrorText, false);
-                SetActive(m_SaveButton, true);
-                SetActive(m_LoadButton, true);
-                SetActive(m_MappingStatusText, true);
-            }
-            else
-            {
-                SetActive(m_ErrorText, true);
-                SetActive(m_SaveButton, false);
-                SetActive(m_LoadButton, false);
-                SetActive(m_MappingStatusText, false);
-            }
+            // if (supported)
+            // {
+            //     SetActive(m_ErrorText, false);
+            //     SetActive(m_SaveButton, true);
+            //     SetActive(m_LoadButton, true);
+            //     SetActive(m_MappingStatusText, true);
+            // }
+            // else
+            // {
+            //     SetActive(m_ErrorText, true);
+            //     SetActive(m_SaveButton, false);
+            //     SetActive(m_LoadButton, false);
+            //     SetActive(m_MappingStatusText, false);
+            // }
 
 #if UNITY_IOS
             var sessionSubsystem = (ARKitSessionSubsystem)m_ARSession.subsystem;
