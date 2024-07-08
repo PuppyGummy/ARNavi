@@ -36,6 +36,7 @@ public class NFCReader : MonoBehaviour
             TextRecord textRecord = (TextRecord)record;
             RecenterHelper.Instance.Recenter(textRecord.text);
             text.text = "NFC Tag Detected: " + textRecord.text;
+            NativeNFCManager.Disable();
         }
     }
 }

@@ -21,8 +21,9 @@ public class ARPlaceAnchor : MonoBehaviour
     public List<GameObject> contents = new List<GameObject>();
     public GameObject contentParent;
     private int contentIndex = 0;
-    private float contentHeight = 0.8f;
+    private float contentHeight = 0.6f;
     private AnchorDataList anchorDataList = new AnchorDataList();
+    [SerializeField] private bool canPlaceAnchors = false;
 
 
     public ARAnchorManager anchorManager
@@ -75,7 +76,7 @@ public class ARPlaceAnchor : MonoBehaviour
 
     private void Update()
     {
-        if (Input.touchCount > 0)
+        if (Input.touchCount > 0 && canPlaceAnchors)
         {
             Touch touch = Input.GetTouch(0);
             if (touch.phase == TouchPhase.Began)
@@ -169,7 +170,6 @@ public class ARPlaceAnchor : MonoBehaviour
     public void SaveAnchors()
     {
         SaveLoadManager.SaveAnchors(anchorDataList);
-        
     }
     public void LoadAnchors()
     {
@@ -182,10 +182,24 @@ public class ARPlaceAnchor : MonoBehaviour
                 {
                     if (anchor.trackableId.ToString() == anchorData.anchorID)
                     {
+                        GameObject content;
                         if (contents != null)
                         {
-                            Instantiate(contents[anchorData.contentIndex], anchor.transform.position, anchor.transform.rotation);
+                            content = Instantiate(contents[anchorData.contentIndex], anchor.transform.position, anchor.transform.rotation);
                         }
+                        else
+                        {
+                            content = Instantiate(m_Prefab, anchor.transform.position, anchor.transform.rotation);
+                        }
+
+                        // Ensure content has ARAnchor component
+                        var contentAnchor = content.GetComponent<ARAnchor>();
+                        if (contentAnchor == null)
+                        {
+                            contentAnchor = content.AddComponent<ARAnchor>();
+                        }
+
+                        content.transform.SetParent(contentParent.transform);
                         m_Anchors.Add(anchor);
                         break;
                     }
