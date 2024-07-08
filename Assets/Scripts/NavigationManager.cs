@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
-using Niantic.Experimental.Lightship.AR.WorldPositioning;
+// using Niantic.Experimental.Lightship.AR.WorldPositioning;
 using UnityEngine.XR.ARFoundation;
 using Unity.XR.CoreUtils;
 using UnityEngine.UI;
@@ -19,9 +19,9 @@ public class NavigationManager : MonoBehaviour
     public Vector3 targetPosition = Vector3.zero;
     [SerializeField] private TMP_Text statusText;
     [SerializeField] private XROrigin sessionOrigin;
-    private ARWorldPositioningCameraHelper cameraHelper;
+    // private ARWorldPositioningCameraHelper cameraHelper;
     [SerializeField] private ARCameraManager arCameraManager;
-    [SerializeField] private ARWorldPositioningManager wpsManager;
+    // [SerializeField] private ARWorldPositioningManager wpsManager;
     [SerializeField] private Button wallToggleButton;
     [SerializeField] private GameObject wallParent;
     [SerializeField] private Material defaultMaterial;
@@ -66,13 +66,19 @@ public class NavigationManager : MonoBehaviour
     private void Start()
     {
         path = new NavMeshPath();
-        cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
+        // cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
         SetMaterial(wallParent.transform, occlusionMaterial);
         lineVisualization.SetActive(true);
         arrowVisualization.SetActive(false);
 
         FillFloorDropdown();
         FillTargetDropdown();
+
+        //set the values chosen in the main menu screen
+        SetFloorInitial();
+        SetTargetInitial();
+
+
     }
     private void Update()
     {
@@ -88,6 +94,50 @@ public class NavigationManager : MonoBehaviour
             SaveCurrentMap();
         }
     }
+    //after getting to navigation screen from the selection page, change the target to reflect the choice
+    public void SetTargetInitial()
+    { 
+
+        //get current target set in main menu page
+        Target tarSelect = SearchControl.GetCurrentTarget();
+        //iterate through all options in the targetlist
+        for (int i = 0; i<targetListDropdown.options.Count; i++)
+        {
+            //if the name matches, set the dropdown value to the corresponding value
+            if (targetListDropdown.options[i].text == tarSelect.targetName)
+            {
+                targetListDropdown.value = i;
+                break;
+            }
+   
+        }
+        //set current navigation target accrording to the newly set dropdown
+        SetCurrentNavigationTarget();
+
+     }
+
+    //after getting to the navigation screen from the selection page, change the floor to reflect the choice
+    public void SetFloorInitial()
+    {
+        //clear the targetlist and targetposition
+        targetList.Clear();
+        targetPosition = Vector3.zero;
+        //get the floor that was selected in the main menu screen
+        Floor floorSelection = SearchControl.GetCurrentFloor();
+        //iterate through the list of floors
+        for (int i = 0; i < floorListDropdown.options.Count; i++)
+        {
+            //check if name of option matching the selected floor and set accordingly
+            if (floorListDropdown.options[i].text == floorSelection.floorName)
+            {
+                floorListDropdown.value = i;
+                break;
+            }
+        }
+        //set current floor according to the newly set dropdown
+        SetCurrentFloor();
+    }
+
     public void SetLineYOffsetText()
     {
         lineYOffsetSlider.GetComponentInChildren<TMP_Text>().text = "Line Y Offset: " + lineYOffsetSlider.value.ToString();
@@ -104,11 +154,11 @@ public class NavigationManager : MonoBehaviour
         currentTarget.GetComponent<MeshRenderer>().enabled = true;
         targetPosition = currentTarget.transform.position;
     }
-    private void WorldPositionUpdate()
-    {
-        float heading = cameraHelper.TrueHeading;
-        userIndicator.transform.rotation = Quaternion.Euler(0, heading, 0);
-    }
+    // private void WorldPositionUpdate()
+    // {
+    //     float heading = cameraHelper.TrueHeading;
+    //     userIndicator.transform.rotation = Quaternion.Euler(0, heading, 0);
+    // }
     public void SetCurrentFloor()
     {
         targetList.Clear();
@@ -188,27 +238,38 @@ public class NavigationManager : MonoBehaviour
     {
         MapData data = new MapData
         {
-            targets = new List<Target>(),
             floors = new List<Floor>(),
             recenterTargets = new List<Target>()
         };
-        foreach (var target in targetList)
-        {
-            Target newTarget = new Target
-            {
-                targetName = target.name,
-                targetPosition = target.transform.position
-            };
-            data.targets.Add(newTarget);
-        }
+    
+        //iterate through all floors
         foreach (var floor in floorList)
         {
+            //create a newFloor with the name of the current floor iteration
             Floor newFloor = new Floor
             {
-                floorName = floor.name
+                floorName = floor.name,
+                targetsOnFloor = new List<Target>()
             };
+            //for each child (target) of the floor, create a corresponding target and add it to the floor
+            for(int i = 0; i<floor.transform.childCount; i++)
+            {
+                var myTarget = floor.transform.GetChild(i);
+                Target targetToAdd = new Target
+                {
+
+                    targetName = myTarget.name,
+                    targetPosition = myTarget.transform.position,
+                    tag = myTarget.tag
+
+                };
+                newFloor.targetsOnFloor.Add(targetToAdd);
+
+            }
+            //add the new floor to the MapDa
             data.floors.Add(newFloor);
         }
+      
         foreach (var recenterTarget in RecenterHelper.Instance.recenterTargetList)
         {
             Target newRecenterTarget = new Target
