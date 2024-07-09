@@ -185,7 +185,7 @@ namespace UnityEngine.XR.ARFoundation.Samples
             Log("Apply ARWorldMap to current session.");
             sessionSubsystem.ApplyWorldMap(worldMap);
 
-            yield return new WaitUntil(() => ARSession.state == ARSessionState.SessionTracking);
+            // yield return new WaitUntil(() => ARSession.state == ARSessionState.SessionTracking);
             Log("Loading anchors...");
             ARPlaceAnchor.Instance.LoadAnchors();
         }

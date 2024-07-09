@@ -26,6 +26,7 @@ public class NavigationManager : MonoBehaviour
     [SerializeField] private GameObject wallParent;
     [SerializeField] private Material defaultMaterial;
     [SerializeField] private Material occlusionMaterial;
+    [SerializeField] private GameObject minimap;
     public Slider lineYOffsetSlider;
     public GameObject userIndicator;
     private bool wallToggle = false;
@@ -75,10 +76,8 @@ public class NavigationManager : MonoBehaviour
         FillTargetDropdown();
 
         //set the values chosen in the main menu screen
-        SetFloorInitial();
-        SetTargetInitial();
-
-
+        // SetFloorInitial();
+        // SetTargetInitial();
     }
     private void Update()
     {
@@ -95,48 +94,48 @@ public class NavigationManager : MonoBehaviour
         }
     }
     //after getting to navigation screen from the selection page, change the target to reflect the choice
-    public void SetTargetInitial()
-    { 
+    // public void SetTargetInitial()
+    // { 
 
-        //get current target set in main menu page
-        Target tarSelect = SearchControl.GetCurrentTarget();
-        //iterate through all options in the targetlist
-        for (int i = 0; i<targetListDropdown.options.Count; i++)
-        {
-            //if the name matches, set the dropdown value to the corresponding value
-            if (targetListDropdown.options[i].text == tarSelect.targetName)
-            {
-                targetListDropdown.value = i;
-                break;
-            }
-   
-        }
-        //set current navigation target accrording to the newly set dropdown
-        SetCurrentNavigationTarget();
+    //     //get current target set in main menu page
+    //     Target tarSelect = SearchControl.GetCurrentTarget();
+    //     //iterate through all options in the targetlist
+    //     for (int i = 0; i<targetListDropdown.options.Count; i++)
+    //     {
+    //         //if the name matches, set the dropdown value to the corresponding value
+    //         if (targetListDropdown.options[i].text == tarSelect.targetName)
+    //         {
+    //             targetListDropdown.value = i;
+    //             break;
+    //         }
 
-     }
+    //     }
+    //     //set current navigation target accrording to the newly set dropdown
+    //     SetCurrentNavigationTarget();
 
-    //after getting to the navigation screen from the selection page, change the floor to reflect the choice
-    public void SetFloorInitial()
-    {
-        //clear the targetlist and targetposition
-        targetList.Clear();
-        targetPosition = Vector3.zero;
-        //get the floor that was selected in the main menu screen
-        Floor floorSelection = SearchControl.GetCurrentFloor();
-        //iterate through the list of floors
-        for (int i = 0; i < floorListDropdown.options.Count; i++)
-        {
-            //check if name of option matching the selected floor and set accordingly
-            if (floorListDropdown.options[i].text == floorSelection.floorName)
-            {
-                floorListDropdown.value = i;
-                break;
-            }
-        }
-        //set current floor according to the newly set dropdown
-        SetCurrentFloor();
-    }
+    //  }
+
+    // //after getting to the navigation screen from the selection page, change the floor to reflect the choice
+    // public void SetFloorInitial()
+    // {
+    //     //clear the targetlist and targetposition
+    //     targetList.Clear();
+    //     targetPosition = Vector3.zero;
+    //     //get the floor that was selected in the main menu screen
+    //     Floor floorSelection = SearchControl.GetCurrentFloor();
+    //     //iterate through the list of floors
+    //     for (int i = 0; i < floorListDropdown.options.Count; i++)
+    //     {
+    //         //check if name of option matching the selected floor and set accordingly
+    //         if (floorListDropdown.options[i].text == floorSelection.floorName)
+    //         {
+    //             floorListDropdown.value = i;
+    //             break;
+    //         }
+    //     }
+    //     //set current floor according to the newly set dropdown
+    //     SetCurrentFloor();
+    // }
 
     public void SetLineYOffsetText()
     {
@@ -241,7 +240,7 @@ public class NavigationManager : MonoBehaviour
             floors = new List<Floor>(),
             recenterTargets = new List<Target>()
         };
-    
+
         //iterate through all floors
         foreach (var floor in floorList)
         {
@@ -252,7 +251,7 @@ public class NavigationManager : MonoBehaviour
                 targetsOnFloor = new List<Target>()
             };
             //for each child (target) of the floor, create a corresponding target and add it to the floor
-            for(int i = 0; i<floor.transform.childCount; i++)
+            for (int i = 0; i < floor.transform.childCount; i++)
             {
                 var myTarget = floor.transform.GetChild(i);
                 Target targetToAdd = new Target
@@ -269,7 +268,7 @@ public class NavigationManager : MonoBehaviour
             //add the new floor to the MapDa
             data.floors.Add(newFloor);
         }
-      
+
         foreach (var recenterTarget in RecenterHelper.Instance.recenterTargetList)
         {
             Target newRecenterTarget = new Target
@@ -280,5 +279,9 @@ public class NavigationManager : MonoBehaviour
             data.recenterTargets.Add(newRecenterTarget);
         }
         SaveLoadManager.SaveMap(data);
+    }
+    public void ToggleMinimap()
+    {
+        minimap.SetActive(!minimap.activeSelf);
     }
 }

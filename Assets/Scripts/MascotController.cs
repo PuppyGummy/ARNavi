@@ -19,6 +19,7 @@ public class MascotController : MonoBehaviour
     private Vector3 currentPosition;
     private bool setMascotAtFirstTime = false;
     private float time;
+    public bool mascotActive = false;
 
     public static MascotController Instance;
     private void Awake()
@@ -42,6 +43,10 @@ public class MascotController : MonoBehaviour
 
     void Update()
     {
+        if (!mascotActive)
+        {
+            return;
+        }
         path = NavigationManager.Instance.path;
         if (path.status == NavMeshPathStatus.PathInvalid)
         {
@@ -136,5 +141,10 @@ public class MascotController : MonoBehaviour
     public void SetMascotStartingPosition()
     {
         mascotTransform.position = userIndicator.transform.position;
+    }
+    public void ToggleMascot()
+    {
+        mascotActive = !mascotActive;
+        mascotTransform.gameObject.SetActive(mascotActive);
     }
 }

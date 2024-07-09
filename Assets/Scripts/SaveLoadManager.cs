@@ -18,7 +18,7 @@ public class SaveLoadManager : MonoBehaviour
     {
         if (File.Exists(MapSavePath))
         {
-            string json = File.ReadAllText(MapSavePath);
+            string json = Resources.Load<TextAsset>("map_data").text;
             return JsonUtility.FromJson<MapData>(json);
         }
         Debug.LogError("Map file not found");
