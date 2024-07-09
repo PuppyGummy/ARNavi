@@ -16,13 +16,17 @@ public class SaveLoadManager : MonoBehaviour
 
     public static MapData LoadMap()
     {
-        if (File.Exists(MapSavePath))
-        {
-            string json = File.ReadAllText(MapSavePath);
-            return JsonUtility.FromJson<MapData>(json);
-        }
-        Debug.LogError("Map file not found");
+        //if (File.Exists(MapSavePath))
+        //{
+        //    string json = File.ReadAllText(MapSavePath);
+        //    return JsonUtility.FromJson<MapData>(json);
+        //}
+        var json = Resources.Load<TextAsset>("/map_data");
+        //return JsonUtility.FromJson<MapData>(json.text);
+        Debug.Log(json.text);
         return null;
+        //Debug.LogError("Map file not found");
+        
     }
     public static void SaveAnchors(AnchorDataList anchorDataList)
     {
