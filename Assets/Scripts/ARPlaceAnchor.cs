@@ -207,4 +207,9 @@ public class ARPlaceAnchor : MonoBehaviour
             }
         }
     }
+    public void TogglePlaceAnchors()
+    {
+        canPlaceAnchors = !canPlaceAnchors;
+        ARWorldMapController.Instance.TogglePlaceAnchorsUI(canPlaceAnchors);
+    }
 }

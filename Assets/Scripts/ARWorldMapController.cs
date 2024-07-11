@@ -261,6 +261,15 @@ namespace UnityEngine.XR.ARFoundation.Samples
             SetText(m_MappingStatusText, $"Mapping Status: {sessionSubsystem.worldMappingStatus}");
 #endif
         }
-
+        public void TogglePlaceAnchorsUI(bool canPlaceAnchors)
+        {
+            Debug.Log(canPlaceAnchors);
+            m_LogText.gameObject.SetActive(canPlaceAnchors);
+            m_SaveButton.gameObject.SetActive(canPlaceAnchors);
+            m_LoadButton.gameObject.SetActive(canPlaceAnchors);
+            m_ErrorText.gameObject.SetActive(canPlaceAnchors);
+            m_MappingStatusText.gameObject.SetActive(canPlaceAnchors);
+            Debug.Log(m_LogText.gameObject.activeSelf);
+        }
     }
 }
