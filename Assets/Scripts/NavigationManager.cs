@@ -35,6 +35,9 @@ public class NavigationManager : MonoBehaviour
     public GameObject currentFloor { get; private set; }
     [SerializeField] private GameObject lineVisualization;
     [SerializeField] private GameObject arrowVisualization;
+    [SerializeField] private GameObject arrivalIndicationPanel;
+    [SerializeField] private float arrivalDistance = 1.5f;
+    private bool arrivedFlag = false;
 
     public static NavigationManager Instance;
     private void Awake()
@@ -69,8 +72,8 @@ public class NavigationManager : MonoBehaviour
         path = new NavMeshPath();
         // cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
         SetMaterial(wallParent.transform, occlusionMaterial);
-        lineVisualization.SetActive(true);
-        arrowVisualization.SetActive(false);
+        lineVisualization.SetActive(false);
+        arrowVisualization.SetActive(true);
 
         FillFloorDropdown();
         FillTargetDropdown();
@@ -92,6 +95,7 @@ public class NavigationManager : MonoBehaviour
         {
             SaveCurrentMap();
         }
+        HasArrived();
     }
     //after getting to navigation screen from the selection page, change the target to reflect the choice
     // public void SetTargetInitial()
@@ -283,5 +287,24 @@ public class NavigationManager : MonoBehaviour
     public void ToggleMinimap()
     {
         minimap.SetActive(!minimap.activeSelf);
+    }
+    private void HasArrived()
+    {
+        if (targetPosition == Vector3.zero)
+        {
+            return;
+        }
+        if (Vector3.Distance(userIndicator.transform.position, targetPosition) < arrivalDistance)
+        {
+            if (!arrivedFlag)
+            {
+                arrivedFlag = true;
+                arrivalIndicationPanel.SetActive(true);
+            }
+        }
+        else
+        {
+            arrivedFlag = false;
+        }
     }
 }
