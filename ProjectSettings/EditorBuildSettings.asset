@@ -59,9 +59,12 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/MainMenu.unity
     guid: c52099e026d5e4406bdcf06cc8ccc8af
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Navigation.unity
     guid: edce15fdc0d1e47e9af0610544499fe3
+  - enabled: 1
+    path: Assets/Scenes/Navigation.unity
+    guid: 57a15c6ff482a432c9bb627653202c89
   - enabled: 1
     path: Assets/Scenes/LanguageSelect.unity
     guid: 36e62dbaf1e83614eab07907f92aa55b
