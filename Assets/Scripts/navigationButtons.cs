@@ -20,6 +20,7 @@ public class NavigationButtons: MonoBehaviour
         not sure if this is needed, currently the only setting is language, but if we are adding acessibility features the settings page may
         be a good place for those
     5: Confirm Destinations
+    6. Explore 
     */
 
 
@@ -34,6 +35,11 @@ public class NavigationButtons: MonoBehaviour
     */
     public static void ToMainMenu() {
         SceneManager.LoadScene(1);
+    }
+
+    public static void ToExplore()
+    {
+        SceneManager.LoadScene(6);
     }
 
 
