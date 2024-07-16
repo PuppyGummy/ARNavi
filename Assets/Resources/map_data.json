@@ -4,20 +4,20 @@
             "floorName": "First Floor",
             "targetsOnFloor": [
                 {
-                    "targetName": "Project Room 3",
-                    "targetPosition": {
-                        "x": -21.850000381469728,
-                        "y": 1.0,
-                        "z": -13.460000991821289
-                    },
-                    "tag": "Medical"
-                },
-                {
                     "targetName": "Project Room 2",
                     "targetPosition": {
                         "x": -21.899999618530275,
                         "y": 1.0,
                         "z": -2.070000648498535
+                    },
+                    "tag": "Medical"
+                },
+                {
+                    "targetName": "Project Room 3",
+                    "targetPosition": {
+                        "x": -21.850000381469728,
+                        "y": 1.0,
+                        "z": -13.460000991821289
                     },
                     "tag": "Medical"
                 },

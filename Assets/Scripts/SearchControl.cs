@@ -6,11 +6,6 @@ using TMPro;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 //use a serialized field for the container (content holder) of the scroll view and get its children (the results we instantiate at runtime)
-//TODO:
-/*
- talk to Lan about iOS building
-    also about mascot on/off toggle
- */
 public class SearchControl : MonoBehaviour
 {
     [SerializeField] private GameObject searchResultsHolder;
@@ -35,24 +30,29 @@ public class SearchControl : MonoBehaviour
     private static Target currentTarget;
     private static Floor currentFloor;
 
+
    
-    
+
+    public void Awake()
+    {
+        targetList = SaveLoadManager.LoadMap();
+
+    }
 
     public void Start()
     {
-        
-        targetList = SaveLoadManager.LoadMap();
         floors = targetList.floors;
         //the first floor is chosen by default
         targets = targetList.floors[0].targetsOnFloor;
         currentFloor = floors[0];
         currentTarget = targets[0];
+
         userSearch.text = currentTarget.targetName;
+        userSearch.text = "";
         FillFloorDropdown();
         FillTargetDropdown();
-        userSearch.text = "";
-
         InstantiateSearchResults();
+
     }
     private void InstantiateSearchResults()
     {
@@ -110,8 +110,9 @@ public class SearchControl : MonoBehaviour
                 filteredTargets.Add(target);
             }
         }
+        
         //if no filters are on, just display all targets on the current floor
-        if(!funToggle.isOn && !medToggle.isOn && !amenitiesToggle.isOn)
+        if (!funToggle.isOn && !medToggle.isOn && !amenitiesToggle.isOn)
         {
             foreach(Target target in newTargets)
             {
