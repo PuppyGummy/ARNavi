@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class MascotController : MonoBehaviour
 {
@@ -10,7 +12,10 @@ public class MascotController : MonoBehaviour
     [SerializeField] private float moveTolerance = 0.1f;
     [SerializeField] private float rotationSpeed = 1.5f;
     [SerializeField] private float idelTime = 0.5f;
+    [SerializeField] private GameObject mascotsParent;
+    [SerializeField] private Button switchMascotButton;
 
+    private List<Transform> mascots = new List<Transform>();
     private NavMeshPath path;
     private GameObject userIndicator;
     private NavMeshAgent agent;
@@ -19,6 +24,8 @@ public class MascotController : MonoBehaviour
     private Vector3 currentPosition;
     private bool setMascotAtFirstTime = false;
     private float time;
+    public bool mascotActive = false;
+    private int currentMascotIndex = 0;
 
     public static MascotController Instance;
     private void Awake()
@@ -31,17 +38,28 @@ public class MascotController : MonoBehaviour
         }
 
         Instance = this;
-        GameObject.DontDestroyOnLoad(this.gameObject);
+        // GameObject.DontDestroyOnLoad(this.gameObject);
     }
     void Start()
     {
+        foreach (Transform child in mascotsParent.transform)
+        {
+            mascots.Add(child);
+        }
+        mascotTransform = mascots[currentMascotIndex];
+        mascotTransform.gameObject.SetActive(mascotActive);
         userIndicator = NavigationManager.Instance.userIndicator;
         agent = mascotTransform.GetComponent<NavMeshAgent>();
         animator = mascotTransform.GetComponent<Animator>();
+        switchMascotButton.gameObject.SetActive(mascotActive);
     }
 
     void Update()
     {
+        if (!mascotActive)
+        {
+            return;
+        }
         path = NavigationManager.Instance.path;
         if (path.status == NavMeshPathStatus.PathInvalid)
         {
@@ -136,5 +154,25 @@ public class MascotController : MonoBehaviour
     public void SetMascotStartingPosition()
     {
         mascotTransform.position = userIndicator.transform.position;
+    }
+    public void ToggleMascot()
+    {
+        mascotActive = !mascotActive;
+        mascotTransform.gameObject.SetActive(mascotActive);
+        switchMascotButton.gameObject.SetActive(mascotActive);
+    }
+    public void ChangeMascot()
+    {
+        currentMascotIndex++;
+        if (currentMascotIndex >= mascots.Count)
+        {
+            currentMascotIndex = 0;
+        }
+        mascotTransform.gameObject.SetActive(false);
+        mascotTransform = mascots[currentMascotIndex];
+        mascotTransform.gameObject.SetActive(true);
+        setMascotAtFirstTime = false;
+        agent = mascotTransform.GetComponent<NavMeshAgent>();
+        animator = mascotTransform.GetComponent<Animator>();
     }
 }

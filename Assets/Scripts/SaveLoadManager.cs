@@ -16,9 +16,16 @@ public class SaveLoadManager : MonoBehaviour
 
     public static MapData LoadMap()
     {
-        var json = Resources.Load<TextAsset>("map_data");
-        return JsonUtility.FromJson<MapData>(json.text);
+        TextAsset jsonTextAsset = Resources.Load<TextAsset>("map_data");
+        if (jsonTextAsset != null)
+        {
+            string json = jsonTextAsset.text;
+            return JsonUtility.FromJson<MapData>(json);
+        }
+        Debug.LogError("Map file not found in Resources folder");
+        return null;
     }
+
     public static void SaveAnchors(AnchorDataList anchorDataList)
     {
         string json = JsonUtility.ToJson(anchorDataList);

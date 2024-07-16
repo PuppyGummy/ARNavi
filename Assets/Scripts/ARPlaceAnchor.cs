@@ -51,7 +51,7 @@ public class ARPlaceAnchor : MonoBehaviour
         }
 
         Instance = this;
-        GameObject.DontDestroyOnLoad(this.gameObject);
+        // GameObject.DontDestroyOnLoad(this.gameObject);
     }
 
     public void RemoveAllAnchors()
@@ -206,5 +206,10 @@ public class ARPlaceAnchor : MonoBehaviour
                 }
             }
         }
+    }
+    public void TogglePlaceAnchors()
+    {
+        canPlaceAnchors = !canPlaceAnchors;
+        ARWorldMapController.Instance.TogglePlaceAnchorsUI(canPlaceAnchors);
     }
 }

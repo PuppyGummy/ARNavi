@@ -185,7 +185,7 @@ namespace UnityEngine.XR.ARFoundation.Samples
             Log("Apply ARWorldMap to current session.");
             sessionSubsystem.ApplyWorldMap(worldMap);
 
-            yield return new WaitUntil(() => ARSession.state == ARSessionState.SessionTracking);
+            // yield return new WaitUntil(() => ARSession.state == ARSessionState.SessionTracking);
             Log("Loading anchors...");
             ARPlaceAnchor.Instance.LoadAnchors();
         }
@@ -202,7 +202,7 @@ namespace UnityEngine.XR.ARFoundation.Samples
             }
 
             Instance = this;
-            GameObject.DontDestroyOnLoad(this.gameObject);
+            // GameObject.DontDestroyOnLoad(this.gameObject);
         }
 
         public void Log(string logMessage)
@@ -261,6 +261,15 @@ namespace UnityEngine.XR.ARFoundation.Samples
             SetText(m_MappingStatusText, $"Mapping Status: {sessionSubsystem.worldMappingStatus}");
 #endif
         }
-
+        public void TogglePlaceAnchorsUI(bool canPlaceAnchors)
+        {
+            Debug.Log(canPlaceAnchors);
+            m_LogText.gameObject.SetActive(canPlaceAnchors);
+            m_SaveButton.gameObject.SetActive(canPlaceAnchors);
+            m_LoadButton.gameObject.SetActive(canPlaceAnchors);
+            m_ErrorText.gameObject.SetActive(canPlaceAnchors);
+            m_MappingStatusText.gameObject.SetActive(canPlaceAnchors);
+            Debug.Log(m_LogText.gameObject.activeSelf);
+        }
     }
 }

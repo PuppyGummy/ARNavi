@@ -8,7 +8,7 @@ using ZXing;
 using Unity.Collections;
 using UnityEngine.UI;
 using TMPro;
-
+using DG.Tweening;
 
 public class RecenterHelper : MonoBehaviour
 {
@@ -19,11 +19,16 @@ public class RecenterHelper : MonoBehaviour
     public List<GameObject> recenterTargetList = new List<GameObject>();
     [SerializeField] private TMP_Text calibrationText;
     [SerializeField] private Image scanPanel;
+    [SerializeField] private GameObject calibrationSuccessPanel;
+    [SerializeField] private GameObject visualMarkerIndicationPanel;
+    [SerializeField] private float visualMarkerDistance = 5f;
 
     private Texture2D cameraImageTexture;
     private IBarcodeReader reader = new BarcodeReader();
     private string qrCodeResult;
     private bool scanningEnabled = false;
+    // private bool isNearVisualMarker = false;
+    private Dictionary<GameObject, bool> targetFlags = new Dictionary<GameObject, bool>();
     public static RecenterHelper Instance;
     private void Awake()
     {
@@ -35,7 +40,7 @@ public class RecenterHelper : MonoBehaviour
         }
 
         Instance = this;
-        GameObject.DontDestroyOnLoad(this.gameObject);
+        // GameObject.DontDestroyOnLoad(this.gameObject);
     }
     // Start is called before the first frame update
     void Start()
@@ -45,12 +50,20 @@ public class RecenterHelper : MonoBehaviour
             recenterTargetList.Add(target.gameObject);
         }
         Recenter("FirstFloorStartPoint");
+        foreach (var target in recenterTargetList)
+        {
+            targetFlags[target] = false;
+        }
     }
 
     // Update is called once per frame
     void Update()
     {
-
+        // if (Input.GetKeyDown(KeyCode.C))
+        // {
+        //     ShowPanelAnim(calibrationSuccessPanel);
+        // }
+        IsNearVisualMarker();
     }
 
     private void OnEnable()
@@ -107,6 +120,7 @@ public class RecenterHelper : MonoBehaviour
         scanningEnabled = false;
         calibrationText.gameObject.SetActive(false);
         scanPanel.gameObject.SetActive(false);
+        ShowPanelAnim(calibrationSuccessPanel);
     }
     public void ToggleScanning()
     {
@@ -138,6 +152,37 @@ public class RecenterHelper : MonoBehaviour
                 session.Reset();
                 sessionOrigin.transform.SetPositionAndRotation(target.transform.position, target.transform.rotation);
                 break;
+            }
+        }
+    }
+    private void ShowPanelAnim(GameObject panel)
+    {
+        panel.SetActive(true);
+        panel.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack).OnComplete(() =>
+        {
+            panel.transform.DOScale(Vector3.zero, 0.5f).SetEase(Ease.InBack).SetDelay(0.5f).OnComplete(() =>
+            {
+                panel.SetActive(false);
+            });
+        });
+    }
+    private void IsNearVisualMarker()
+    {
+        // if the user is near any of the recenter targets, show the visual marker indication panel
+        foreach (var target in recenterTargetList)
+        {
+            // show the panel only once when the user is near the visual marker, and reset the flag
+            if (Vector3.Distance(sessionOrigin.transform.position, target.transform.position) < visualMarkerDistance)
+            {
+                if (!targetFlags[target])
+                {
+                    ShowPanelAnim(visualMarkerIndicationPanel);
+                    targetFlags[target] = true;
+                }
+            }
+            else
+            {
+                targetFlags[target] = false;
             }
         }
     }
