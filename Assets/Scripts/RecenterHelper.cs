@@ -157,13 +157,9 @@ public class RecenterHelper : MonoBehaviour
     }
     private void ShowPanelAnim(GameObject panel)
     {
-        panel.SetActive(true);
         panel.transform.DOScale(Vector3.one, 0.5f).SetEase(Ease.OutBack).OnComplete(() =>
         {
-            panel.transform.DOScale(Vector3.zero, 0.5f).SetEase(Ease.InBack).SetDelay(0.5f).OnComplete(() =>
-            {
-                panel.SetActive(false);
-            });
+            panel.transform.DOScale(Vector3.zero, 0.5f).SetEase(Ease.InBack).SetDelay(0.5f);
         });
     }
     private void IsNearVisualMarker()
