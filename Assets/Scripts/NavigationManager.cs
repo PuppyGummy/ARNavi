@@ -50,7 +50,7 @@ public class NavigationManager : MonoBehaviour
         }
 
         Instance = this;
-        GameObject.DontDestroyOnLoad(this.gameObject);
+        // GameObject.DontDestroyOnLoad(this.gameObject);
 
         // Fill floor list with the children of the floors parent
         foreach (Transform floor in floorsParent.transform)

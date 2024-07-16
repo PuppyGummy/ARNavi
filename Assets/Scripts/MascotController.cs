@@ -38,7 +38,7 @@ public class MascotController : MonoBehaviour
         }
 
         Instance = this;
-        GameObject.DontDestroyOnLoad(this.gameObject);
+        // GameObject.DontDestroyOnLoad(this.gameObject);
     }
     void Start()
     {

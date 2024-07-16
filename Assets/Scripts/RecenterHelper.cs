@@ -40,7 +40,7 @@ public class RecenterHelper : MonoBehaviour
         }
 
         Instance = this;
-        GameObject.DontDestroyOnLoad(this.gameObject);
+        // GameObject.DontDestroyOnLoad(this.gameObject);
     }
     // Start is called before the first frame update
     void Start()

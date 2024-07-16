@@ -202,7 +202,7 @@ namespace UnityEngine.XR.ARFoundation.Samples
             }
 
             Instance = this;
-            GameObject.DontDestroyOnLoad(this.gameObject);
+            // GameObject.DontDestroyOnLoad(this.gameObject);
         }
 
         public void Log(string logMessage)

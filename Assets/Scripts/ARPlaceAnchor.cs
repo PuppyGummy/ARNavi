@@ -51,7 +51,7 @@ public class ARPlaceAnchor : MonoBehaviour
         }
 
         Instance = this;
-        GameObject.DontDestroyOnLoad(this.gameObject);
+        // GameObject.DontDestroyOnLoad(this.gameObject);
     }
 
     public void RemoveAllAnchors()
