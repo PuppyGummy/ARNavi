@@ -100,7 +100,6 @@ public class ARPlaceAnchor : MonoBehaviour
                 if (raycastManager.Raycast(touch.position, hits))
                 {
                     ARRaycastHit hit = hits[0];
-                    // CreateAnchor(hits[0]);
                     if (canEditAnchors && DetectAnchor(hit.pose.position))
                     {
 
@@ -108,6 +107,13 @@ public class ARPlaceAnchor : MonoBehaviour
                     else if (canPlaceAnchors)
                     {
                         CreateAnchor(hit);
+                    }
+                    else
+                    {
+                        currentAnchor.GetComponent<Outline>().enabled = false;
+                        currentAnchor = null;
+                        transformUI.SetActive(false);
+                        minimap.SetActive(true);
                     }
                 }
             }
@@ -239,14 +245,17 @@ public class ARPlaceAnchor : MonoBehaviour
     public void TogglePlaceAnchors()
     {
         canPlaceAnchors = !canPlaceAnchors;
-        ARWorldMapController.Instance.TogglePlaceAnchorsUI(canPlaceAnchors);
+        ARWorldMapController.Instance.TogglePlaceAnchorsUI(canPlaceAnchors || canEditAnchors);
     }
     public void ToggleEditAnchors()
     {
         canEditAnchors = !canEditAnchors;
+        ARWorldMapController.Instance.TogglePlaceAnchorsUI(canPlaceAnchors || canEditAnchors);
     }
     public void SetCurrentAnchor(ARAnchor anchor)
     {
+        if (currentAnchor != null)
+            currentAnchor.GetComponent<Outline>().enabled = false;
         currentAnchor = anchor;
         anchor.GetComponent<Outline>().enabled = true;
         UpdateInputFields();
