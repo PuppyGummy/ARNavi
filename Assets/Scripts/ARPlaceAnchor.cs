@@ -4,6 +4,9 @@ using UnityEngine;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARFoundation.Samples;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using TMPro;
+using Unity.VisualScripting;
 
 public class ARPlaceAnchor : MonoBehaviour
 {
@@ -24,6 +27,14 @@ public class ARPlaceAnchor : MonoBehaviour
     private float contentHeight = 0.6f;
     private AnchorDataList anchorDataList = new AnchorDataList();
     [SerializeField] private bool canPlaceAnchors = false;
+    [SerializeField] private bool canEditAnchors = false;
+    [SerializeField] private TMP_InputField inputX;
+    [SerializeField] private TMP_InputField inputY;
+    [SerializeField] private TMP_InputField inputZ;
+    [SerializeField] private TMP_Dropdown transformDropdown;
+    [SerializeField] private GameObject transformUI;
+    [SerializeField] private GameObject minimap;
+    private ARAnchor currentAnchor;
 
 
     public ARAnchorManager anchorManager
@@ -76,7 +87,7 @@ public class ARPlaceAnchor : MonoBehaviour
 
     private void Update()
     {
-        if (Input.touchCount > 0 && canPlaceAnchors)
+        if (Input.touchCount > 0)
         {
             Touch touch = Input.GetTouch(0);
             if (touch.phase == TouchPhase.Began)
@@ -88,7 +99,16 @@ public class ARPlaceAnchor : MonoBehaviour
                 List<ARRaycastHit> hits = new List<ARRaycastHit>();
                 if (raycastManager.Raycast(touch.position, hits))
                 {
-                    CreateAnchor(hits[0]);
+                    ARRaycastHit hit = hits[0];
+                    // CreateAnchor(hits[0]);
+                    if (canEditAnchors && DetectAnchor(hit.pose.position))
+                    {
+
+                    }
+                    else if (canPlaceAnchors)
+                    {
+                        CreateAnchor(hit);
+                    }
                 }
             }
         }
@@ -101,8 +121,20 @@ public class ARPlaceAnchor : MonoBehaviour
         EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
         return results.Count > 0;
     }
+    private bool DetectAnchor(Vector3 position)
+    {
+        foreach (var anchor in m_Anchors)
+        {
+            if (Vector3.Distance(anchor.transform.position, position) < 0.5f)
+            {
+                SetCurrentAnchor(anchor);
+                return true;
+            }
+        }
+        return false;
+    }
 
-    void CreateAnchor(ARRaycastHit arRaycastHit)
+    private void CreateAnchor(ARRaycastHit arRaycastHit)
     {
         ARAnchor anchor;
 
@@ -128,9 +160,7 @@ public class ARPlaceAnchor : MonoBehaviour
                 anchor = m_AnchorManager.AttachAnchor(plane, new Pose(new Vector3(arRaycastHit.pose.position.x, contentHeight, arRaycastHit.pose.position.z), Quaternion.Euler(0, 90, 0)));
             }
 
-            // FinalizePlacedAnchor(anchor, $"Attached to plane {plane.trackableId}");
-            anchor.transform.SetParent(contentParent.transform);
-            m_Anchors.Add(anchor);
+            FinalizePlacedAnchor(anchor);
             return;
         }
 
@@ -153,20 +183,19 @@ public class ARPlaceAnchor : MonoBehaviour
             anchorPrefab.transform.SetPositionAndRotation(new Vector3(arRaycastHit.pose.position.x, contentHeight, arRaycastHit.pose.position.z), Quaternion.Euler(0, 90, 0));
             anchor = anchorPrefab.AddComponent<ARAnchor>();
         }
-        anchor.transform.SetParent(contentParent.transform);
-        // FinalizePlacedAnchor(anchor, $"Anchor (from {arRaycastHit.hitType})");
-        m_Anchors.Add(anchor);
+        FinalizePlacedAnchor(anchor);
     }
 
-    // void FinalizePlacedAnchor(ARAnchor anchor, string text)
-    // {
-    //     // var canvasTextManager = anchor.GetComponent<CanvasTextManager>();
-    //     // if (canvasTextManager != null)
-    //     // {
-    //     //     canvasTextManager.text = text;
-    //     // }
-    //     m_Anchors.Add(anchor);
-    // }
+    void FinalizePlacedAnchor(ARAnchor anchor)
+    {
+        anchor.transform.SetParent(contentParent.transform);
+        m_Anchors.Add(anchor);
+
+        Outline outline = anchor.AddComponent<Outline>();
+        outline.effectColor = Color.blue;
+        outline.effectDistance = new Vector2(0.01f, 0.01f);
+        SetCurrentAnchor(anchor);
+    }
     public void SaveAnchors()
     {
         SaveLoadManager.SaveAnchors(anchorDataList);
@@ -211,5 +240,92 @@ public class ARPlaceAnchor : MonoBehaviour
     {
         canPlaceAnchors = !canPlaceAnchors;
         ARWorldMapController.Instance.TogglePlaceAnchorsUI(canPlaceAnchors);
+    }
+    public void ToggleEditAnchors()
+    {
+        canEditAnchors = !canEditAnchors;
+    }
+    public void SetCurrentAnchor(ARAnchor anchor)
+    {
+        currentAnchor = anchor;
+        anchor.GetComponent<Outline>().enabled = true;
+        UpdateInputFields();
+        transformUI.SetActive(true);
+        minimap.SetActive(false);
+    }
+    public void UpdateInputFields()
+    {
+        if (currentAnchor != null)
+        {
+            int currentTransform = transformDropdown.value;
+            switch (currentTransform)
+            {
+                case 0:
+                    Vector3 position = currentAnchor.transform.position;
+                    inputX.text = position.x.ToString();
+                    inputX.interactable = false;
+                    inputY.text = position.y.ToString();
+                    inputZ.text = position.z.ToString();
+                    inputZ.interactable = false;
+                    break;
+                case 1:
+                    Vector3 rotation = currentAnchor.transform.rotation.eulerAngles;
+                    inputX.text = rotation.x.ToString();
+                    inputX.interactable = true;
+                    inputY.text = rotation.y.ToString();
+                    inputZ.text = rotation.z.ToString();
+                    inputZ.interactable = true;
+                    break;
+                case 2:
+                    Vector3 scale = currentAnchor.transform.localScale;
+                    inputX.text = scale.x.ToString();
+                    inputX.interactable = true;
+                    inputY.text = scale.y.ToString();
+                    inputZ.text = scale.z.ToString();
+                    inputZ.interactable = true;
+                    break;
+            }
+        }
+    }
+    public void OnApplyButtonClicked()
+    {
+        if (currentAnchor != null)
+        {
+            float valueX = float.Parse(inputX.text);
+            float valueY = float.Parse(inputY.text);
+            float valueZ = float.Parse(inputZ.text);
+
+            int currentTransform = transformDropdown.value;
+            switch (currentTransform)
+            {
+                case 0:
+                    currentAnchor.transform.position = new Vector3(valueX, valueY, valueZ);
+                    break;
+                case 1:
+                    currentAnchor.transform.rotation = Quaternion.Euler(valueX, valueY, valueZ);
+                    break;
+                case 2:
+                    currentAnchor.transform.localScale = new Vector3(valueX, valueY, valueZ);
+                    break;
+            }
+        }
+        transformUI.SetActive(false);
+        minimap.SetActive(true);
+        currentAnchor.GetComponent<Outline>().enabled = false;
+    }
+    private void RemoveAnchor(ARAnchor anchor)
+    {
+        m_Anchors.Remove(anchor);
+        Destroy(anchor.gameObject);
+    }
+    public void RemoveCurrentAnchor()
+    {
+        if (currentAnchor != null)
+        {
+            RemoveAnchor(currentAnchor);
+            currentAnchor = null;
+            transformUI.SetActive(false);
+            minimap.SetActive(true);
+        }
     }
 }
