@@ -34,13 +34,9 @@ namespace UnityEngine.XR.ARFoundation.Samples
         [SerializeField]
         TMPro.TMP_Text m_MappingStatusText;
 
-        [Tooltip("A UI button component which will generate an ARWorldMap and save it to disk.")]
-        [SerializeField]
-        Button m_SaveButton;
-
-        [Tooltip("A UI button component which will load a previously saved ARWorldMap from disk and apply it to the current session.")]
-        [SerializeField]
-        Button m_LoadButton;
+        [SerializeField] GameObject anchorButtons;
+        [SerializeField] GameObject UIButtons;
+        [SerializeField] GameObject minimap;
 
         static string path => Path.Combine(Application.persistentDataPath, "my_session.worldmap");
 
@@ -263,13 +259,12 @@ namespace UnityEngine.XR.ARFoundation.Samples
         }
         public void TogglePlaceAnchorsUI(bool canPlaceAnchors)
         {
-            Debug.Log(canPlaceAnchors);
             m_LogText.gameObject.SetActive(canPlaceAnchors);
-            m_SaveButton.gameObject.SetActive(canPlaceAnchors);
-            m_LoadButton.gameObject.SetActive(canPlaceAnchors);
             m_ErrorText.gameObject.SetActive(canPlaceAnchors);
             m_MappingStatusText.gameObject.SetActive(canPlaceAnchors);
-            Debug.Log(m_LogText.gameObject.activeSelf);
+            anchorButtons.SetActive(canPlaceAnchors);
+            UIButtons.SetActive(!canPlaceAnchors);
+            minimap.SetActive(!canPlaceAnchors);
         }
     }
 }
