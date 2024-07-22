@@ -98,25 +98,45 @@ public class ARPlaceAnchor : MonoBehaviour
             {
                 if (IsPointerOverUIObject(touch))
                 {
+                    Debug.Log("Touch over UI");
                     return;
                 }
+#if UNITY_EDITOR
+                // Debugging in editor
+                if (canEditAnchors && DetectAnchor(touch.position))
+                {
+                    Debug.Log("Anchor detected");
+                }
+                else if (canPlaceAnchors)
+                {
+                    GameObject prefab = Instantiate(contents[1], Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera, Quaternion.identity);
+                    CreateAnchor(prefab);
+                    Debug.Log("Anchor created");
+                }
+#endif
                 List<ARRaycastHit> hits = new List<ARRaycastHit>();
                 if (raycastManager.Raycast(touch.position, hits))
                 {
                     ARRaycastHit hit = hits[0];
-                    if (canEditAnchors && DetectAnchor(hit.pose.position))
+                    // if (canEditAnchors && DetectAnchor(hit.pose.position))
+                    if (canEditAnchors && DetectAnchor(touch.position))
                     {
-
+                        Debug.Log("Anchor detected");
                     }
                     else if (canPlaceAnchors)
                     {
                         CreateAnchor(hit);
+                        Debug.Log("Anchor created");
                     }
                     else
                     {
-                        currentAnchor.GetComponent<Outline>().enabled = false;
-                        currentAnchor = null;
-                        transformUI.SetActive(false);
+                        Debug.Log("Deselecting");
+                        if (currentAnchor != null)
+                        {
+                            currentAnchor.GetComponent<Outline>().enabled = false;
+                            currentAnchor = null;
+                            transformUI.SetActive(false);
+                        }
                     }
                 }
             }
@@ -132,20 +152,53 @@ public class ARPlaceAnchor : MonoBehaviour
         eventDataCurrentPosition.position = new Vector2(touch.position.x, touch.position.y);
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventDataCurrentPosition, results);
+        foreach (var result in results)
+        {
+            if (result.gameObject.tag == "POI")
+            {
+                return false;
+            }
+        }
         return results.Count > 0;
     }
-    private bool DetectAnchor(Vector3 position)
+    private bool DetectAnchor(Vector2 touchPosition)
     {
-        foreach (var anchor in m_Anchors)
+        Debug.Log("Detecting anchor");
+        Ray ray = Camera.main.ScreenPointToRay(touchPosition);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit))
         {
-            if (Vector3.Distance(anchor.transform.position, position) < 0.5f)
+            bool colliderNotNull = hit.collider != null;
+            bool anchorNotNull = hit.collider.GetComponent<ARAnchor>() != null;
+            Debug.Log("hit.gameObject: " + hit.collider.gameObject);
+            Debug.Log("hit.collider != null: " + colliderNotNull);
+            Debug.Log("hit.collider.GetComponent<ARAnchor>() != null: " + anchorNotNull);
+            if (colliderNotNull && anchorNotNull)
             {
-                SetCurrentAnchor(anchor);
+                Debug.Log("Anchor hit");
+                currentAnchor = hit.collider.GetComponent<ARAnchor>();
+                SetCurrentAnchor(currentAnchor);
                 return true;
             }
+            return false;
         }
         return false;
     }
+    // private bool DetectAnchor(Vector3 touchPosition)
+    // {
+    //     foreach (ARAnchor anchor in m_Anchors)
+    //     {
+    //         Vector3 screenPos = Camera.main.WorldToScreenPoint(anchor.transform.position);
+    //         if (Vector3.Distance(screenPos, touchPosition) < 50)
+    //         {
+    //             currentAnchor = anchor;
+    //             SetCurrentAnchor(anchor);
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
 
     private void CreateAnchor(ARRaycastHit arRaycastHit)
     {
@@ -174,6 +227,7 @@ public class ARPlaceAnchor : MonoBehaviour
             }
 
             FinalizePlacedAnchor(anchor);
+            SetCurrentAnchor(anchor);
             return;
         }
 
@@ -197,17 +251,21 @@ public class ARPlaceAnchor : MonoBehaviour
             anchor = anchorPrefab.AddComponent<ARAnchor>();
         }
         FinalizePlacedAnchor(anchor);
+        SetCurrentAnchor(anchor);
     }
 
     void FinalizePlacedAnchor(ARAnchor anchor)
     {
         anchor.transform.SetParent(contentParent.transform);
+        BoxCollider collider = anchor.AddComponent<BoxCollider>();
+        AdjustColliderSize(anchor.gameObject, collider);
+        anchor.tag = "POI";
         m_Anchors.Add(anchor);
+        currentAnchor = anchor;
 
         Outline outline = anchor.AddComponent<Outline>();
         outline.effectColor = Color.blue;
         outline.effectDistance = new Vector2(0.01f, 0.01f);
-        SetCurrentAnchor(anchor);
     }
     public void SaveAnchors()
     {
@@ -263,7 +321,6 @@ public class ARPlaceAnchor : MonoBehaviour
     {
         if (currentAnchor != null)
             currentAnchor.GetComponent<Outline>().enabled = false;
-        currentAnchor = anchor;
         anchor.GetComponent<Outline>().enabled = true;
         UpdateInputFields();
         transformUI.SetActive(true);
@@ -304,7 +361,11 @@ public class ARPlaceAnchor : MonoBehaviour
             GameObject currentContent = currentAnchor.gameObject;
             m_Anchors.Remove(currentAnchor);
             // destroy the anchor component
-            Destroy(currentContent.GetComponent<ARAnchor>());
+            DestroyImmediate(currentContent.GetComponent<ARAnchor>());
+            Debug.Log("currentContent.GetComponent<ARAnchor>() == null: " + (currentContent.GetComponent<ARAnchor>() == null));
+            DestroyImmediate(currentContent.GetComponent<BoxCollider>());
+            DestroyImmediate(currentContent.GetComponent<Outline>());
+            Debug.Log("currentContent.GetComponent<Outline>() == null: " + (currentContent.GetComponent<Outline>() == null));
 
             float valueX = float.Parse(inputX.text);
             float valueY = float.Parse(inputY.text);
@@ -324,9 +385,10 @@ public class ARPlaceAnchor : MonoBehaviour
                     break;
             }
             CreateAnchor(currentContent);
+            currentContent.GetComponent<Outline>().enabled = false;
+            Debug.Log("currentContent.GetComponent<Outline>().enabled: " + (currentContent.GetComponent<Outline>().enabled));
         }
         transformUI.SetActive(false);
-        currentAnchor.GetComponent<Outline>().enabled = false;
     }
     private void RemoveAnchor(ARAnchor anchor)
     {
@@ -344,7 +406,9 @@ public class ARPlaceAnchor : MonoBehaviour
     }
     public void CreateAnchor(GameObject obj)
     {
-        ARAnchor anchor = ComponentUtils.GetOrAddIf<ARAnchor>(obj, true);
+        // ARAnchor anchor = ComponentUtils.GetOrAddIf<ARAnchor>(obj, true);
+        ARAnchor anchor = obj.AddComponent<ARAnchor>();
+        Debug.Log("Anchor added to object: " + (anchor != null));
         // AnchorData anchorData = new AnchorData
         // {
         //     anchorID = anchor.trackableId.ToString(),
@@ -358,8 +422,10 @@ public class ARPlaceAnchor : MonoBehaviour
         if (currentTextObject != null)
         {
             CreateAnchor(currentTextObject);
+            SetCurrentAnchor(currentAnchor);
             currentTextObject = null;
             isPlacingText = false;
+            inputText.text = "";
         }
     }
     public void OnCreateTextButtonClicked()
@@ -384,7 +450,6 @@ public class ARPlaceAnchor : MonoBehaviour
         if (currentTextObject != null)
         {
             string text = inputText.text;
-            Debug.Log(text);
             currentTextObject.GetComponent<TextMeshPro>().text = text;
         }
     }
@@ -399,5 +464,28 @@ public class ARPlaceAnchor : MonoBehaviour
     public void ToggleSideUI()
     {
         sideUI.SetActive(!sideUI.activeSelf);
+    }
+    private void AdjustColliderSize(GameObject obj, BoxCollider boxCollider)
+    {
+        Renderer renderer = obj.GetComponent<Renderer>();
+        if (renderer != null)
+        {
+            if (obj.GetComponent<TMP_Text>() == null) // obj is not text
+            {
+                // obj should be a 3D object
+                boxCollider.center = renderer.bounds.center - obj.transform.position;
+                boxCollider.size = renderer.bounds.size;
+            }
+        }
+        else
+        {
+            // obj is a UI element
+            // make the collider size equal to the recttransform's width and height
+            RectTransform rectTransform = obj.GetComponent<RectTransform>();
+            if (rectTransform != null)
+            {
+                boxCollider.size = new Vector3(rectTransform.rect.width, rectTransform.rect.height, 0.1f);
+            }
+        }
     }
 }

@@ -12,6 +12,7 @@ TagManager:
   - Facilities
   - Fun
   - Amenities
+  - POI
   layers:
   - Default
   - TransparentFX
