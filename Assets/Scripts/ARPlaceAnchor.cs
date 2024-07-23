@@ -7,6 +7,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
+using UnityEngine.Video;
 
 public class ARPlaceAnchor : MonoBehaviour
 {
@@ -21,7 +22,7 @@ public class ARPlaceAnchor : MonoBehaviour
     private ARRaycastManager raycastManager;
 
     private List<ARAnchor> m_Anchors = new();
-    public List<GameObject> contents = new List<GameObject>();
+    public GameObject[] contents;
     public GameObject contentParent;
     private int contentIndex = 0;
     private float contentHeight = 0.6f;
@@ -35,9 +36,10 @@ public class ARPlaceAnchor : MonoBehaviour
     [SerializeField] private GameObject transformUI;
     [SerializeField] private TMP_InputField inputText;
     [SerializeField] private GameObject sideUI;
+    [SerializeField] private TMP_Dropdown presetsDropdown;
     private ARAnchor currentAnchor;
-    private GameObject currentTextObject;
-    private bool isPlacingText = false;
+    private GameObject currentAnchorObject;
+    private bool isPlacingContent = false;
     private float distanceFromCamera = 1.0f;
 
 
@@ -67,6 +69,8 @@ public class ARPlaceAnchor : MonoBehaviour
 
         Instance = this;
         // GameObject.DontDestroyOnLoad(this.gameObject);
+
+        LoadPresets();
     }
 
     public void RemoveAllAnchors()
@@ -133,7 +137,7 @@ public class ARPlaceAnchor : MonoBehaviour
                         Debug.Log("Deselecting");
                         if (currentAnchor != null)
                         {
-                            currentAnchor.GetComponent<Outline>().enabled = false;
+                            // currentAnchor.GetComponent<Outline>().enabled = false;
                             currentAnchor = null;
                             transformUI.SetActive(false);
                         }
@@ -141,9 +145,9 @@ public class ARPlaceAnchor : MonoBehaviour
                 }
             }
         }
-        if (isPlacingText)
+        if (isPlacingContent)
         {
-            UpdateTextTransform();
+            UpdateContentTransform();
         }
     }
     private bool IsPointerOverUIObject(Touch touch)
@@ -207,7 +211,7 @@ public class ARPlaceAnchor : MonoBehaviour
         // If we hit a plane, try to "attach" the anchor to the plane
         if (m_AnchorManager.descriptor.supportsTrackableAttachments && arRaycastHit.trackable is ARPlane plane)
         {
-            if (contents != null && contentIndex < contents.Count)
+            if (contents != null && contentIndex < contents.Length)
             {
                 var oldPrefab = m_AnchorManager.anchorPrefab;
                 m_AnchorManager.anchorPrefab = contents[contentIndex];
@@ -263,9 +267,9 @@ public class ARPlaceAnchor : MonoBehaviour
         m_Anchors.Add(anchor);
         currentAnchor = anchor;
 
-        Outline outline = anchor.AddComponent<Outline>();
-        outline.effectColor = Color.blue;
-        outline.effectDistance = new Vector2(0.01f, 0.01f);
+        // Outline outline = anchor.AddComponent<Outline>();
+        // outline.effectColor = Color.blue;
+        // outline.effectDistance = new Vector2(0.01f, 0.01f);
     }
     public void SaveAnchors()
     {
@@ -319,9 +323,9 @@ public class ARPlaceAnchor : MonoBehaviour
     }
     public void SetCurrentAnchor(ARAnchor anchor)
     {
-        if (currentAnchor != null)
-            currentAnchor.GetComponent<Outline>().enabled = false;
-        anchor.GetComponent<Outline>().enabled = true;
+        // if (currentAnchor != null)
+        //     currentAnchor.GetComponent<Outline>().enabled = false;
+        // anchor.GetComponent<Outline>().enabled = true;
         UpdateInputFields();
         transformUI.SetActive(true);
     }
@@ -364,8 +368,8 @@ public class ARPlaceAnchor : MonoBehaviour
             DestroyImmediate(currentContent.GetComponent<ARAnchor>());
             Debug.Log("currentContent.GetComponent<ARAnchor>() == null: " + (currentContent.GetComponent<ARAnchor>() == null));
             DestroyImmediate(currentContent.GetComponent<BoxCollider>());
-            DestroyImmediate(currentContent.GetComponent<Outline>());
-            Debug.Log("currentContent.GetComponent<Outline>() == null: " + (currentContent.GetComponent<Outline>() == null));
+            // DestroyImmediate(currentContent.GetComponent<Outline>());
+            // Debug.Log("currentContent.GetComponent<Outline>() == null: " + (currentContent.GetComponent<Outline>() == null));
 
             float valueX = float.Parse(inputX.text);
             float valueY = float.Parse(inputY.text);
@@ -385,8 +389,8 @@ public class ARPlaceAnchor : MonoBehaviour
                     break;
             }
             CreateAnchor(currentContent);
-            currentContent.GetComponent<Outline>().enabled = false;
-            Debug.Log("currentContent.GetComponent<Outline>().enabled: " + (currentContent.GetComponent<Outline>().enabled));
+            // currentContent.GetComponent<Outline>().enabled = false;
+            // Debug.Log("currentContent.GetComponent<Outline>().enabled: " + (currentContent.GetComponent<Outline>().enabled));
         }
         transformUI.SetActive(false);
     }
@@ -417,20 +421,20 @@ public class ARPlaceAnchor : MonoBehaviour
         // anchorDataList.anchors.Add(anchorData);
         FinalizePlacedAnchor(anchor);
     }
-    public void CreateTextAnchor()
+    public void ConfirmCreateAnchor()
     {
-        if (currentTextObject != null)
+        if (currentAnchorObject != null)
         {
-            CreateAnchor(currentTextObject);
+            CreateAnchor(currentAnchorObject);
             SetCurrentAnchor(currentAnchor);
-            currentTextObject = null;
-            isPlacingText = false;
+            currentAnchorObject = null;
+            isPlacingContent = false;
             inputText.text = "";
         }
     }
     public void OnCreateTextButtonClicked()
     {
-        isPlacingText = true;
+        isPlacingContent = true;
 
         GameObject textContent = new GameObject("Text");
         textContent.transform.SetParent(contentParent.transform);
@@ -443,22 +447,22 @@ public class ARPlaceAnchor : MonoBehaviour
         //make the text face the camera
         textContent.transform.rotation = Quaternion.LookRotation(textContent.transform.position - Camera.main.transform.position);
 
-        currentTextObject = textContent;
+        currentAnchorObject = textContent;
     }
     public void OnTextInputFieldChanged()
     {
-        if (currentTextObject != null)
+        if (currentAnchorObject != null)
         {
             string text = inputText.text;
-            currentTextObject.GetComponent<TextMeshPro>().text = text;
+            currentAnchorObject.GetComponent<TextMeshPro>().text = text;
         }
     }
-    public void UpdateTextTransform()
+    public void UpdateContentTransform()
     {
-        if (currentTextObject != null)
+        if (currentAnchorObject != null)
         {
-            currentTextObject.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera;
-            currentTextObject.transform.rotation = Quaternion.LookRotation(currentTextObject.transform.position - Camera.main.transform.position);
+            currentAnchorObject.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera;
+            currentAnchorObject.transform.rotation = Quaternion.LookRotation(currentAnchorObject.transform.position - Camera.main.transform.position);
         }
     }
     public void ToggleSideUI()
@@ -467,10 +471,16 @@ public class ARPlaceAnchor : MonoBehaviour
     }
     private void AdjustColliderSize(GameObject obj, BoxCollider boxCollider)
     {
+        if (obj.GetComponent<TMP_Text>() != null) // obj is text
+            return;
         Renderer renderer = obj.GetComponent<Renderer>();
         if (renderer != null)
         {
-            if (obj.GetComponent<TMP_Text>() == null) // obj is not text
+            if (renderer is SpriteRenderer)
+            {
+                return;
+            }
+            else
             {
                 // obj should be a 3D object
                 boxCollider.center = renderer.bounds.center - obj.transform.position;
@@ -487,5 +497,119 @@ public class ARPlaceAnchor : MonoBehaviour
                 boxCollider.size = new Vector3(rectTransform.rect.width, rectTransform.rect.height, 0.1f);
             }
         }
+    }
+    private void LoadPresets()
+    {
+        // load presets from Resources/Presets folder
+        contents = Resources.LoadAll<GameObject>("Presets");
+        // populate the dropdown with the names of the presets
+        List<string> presetNames = new List<string>();
+        foreach (var content in contents)
+        {
+            presetNames.Add(content.name);
+        }
+        presetsDropdown.ClearOptions();
+        presetsDropdown.AddOptions(presetNames);
+    }
+    public void OnPresetDropdownSelected()
+    {
+        isPlacingContent = true;
+
+        GameObject preset = Instantiate(contents[presetsDropdown.value]);
+        preset.transform.SetParent(contentParent.transform);
+        preset.transform.localScale = new Vector3(1f, 1f, 1f);
+
+        preset.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera;
+        preset.transform.rotation = Quaternion.LookRotation(preset.transform.position - Camera.main.transform.position);
+
+        currentAnchorObject = preset;
+    }
+    public void OnCreatePhotoButtonClicked()
+    {
+        NativeGallery.Permission permission = NativeGallery.GetImageFromGallery((path) =>
+        {
+            if (path != null)
+            {
+                // Create a new texture from the selected image
+                Texture2D texture = NativeGallery.LoadImageAtPath(path, 1024, false, false);
+                Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                if (texture == null)
+                {
+                    Debug.Log("Couldn't load texture from " + path);
+                    return;
+                }
+
+                isPlacingContent = true;
+                // Create a new GameObject with a renderer component
+                GameObject imageContent = new GameObject("Image");
+                imageContent.transform.SetParent(contentParent.transform);
+                imageContent.transform.localScale = new Vector3(3f, 3f, 3f);
+                var renderer = imageContent.AddComponent<SpriteRenderer>();
+                // renderer.material = new Material(Shader.Find("Standard"));
+                renderer.sprite = sprite;
+
+                imageContent.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera;
+                imageContent.transform.rotation = Quaternion.LookRotation(imageContent.transform.position - Camera.main.transform.position);
+
+                currentAnchorObject = imageContent;
+            }
+        }, "Select a PNG image", "image/png");
+    }
+    public void OnCreateVideoButtonClicked()
+    {
+        NativeGallery.Permission permission = NativeGallery.GetVideoFromGallery((path) =>
+        {
+            if (path != null)
+            {
+                isPlacingContent = true;
+                // Create a new GameObject with a video player component
+                GameObject videoContent = new GameObject("Video");
+                videoContent.transform.SetParent(contentParent.transform);
+                videoContent.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
+
+                // Add VideoPlayer component
+                var videoPlayer = videoContent.AddComponent<VideoPlayer>();
+                videoPlayer.url = path;
+                videoPlayer.isLooping = true;
+
+                // Create a RawImage for displaying the video
+                GameObject videoDisplay = new GameObject("VideoDisplay");
+                videoDisplay.transform.SetParent(videoContent.transform);
+                videoDisplay.transform.localPosition = Vector3.zero;
+                videoDisplay.transform.localScale = new Vector3(1f, 1f, 1f);
+
+                RawImage rawImage = videoDisplay.AddComponent<RawImage>();
+
+                // Set the VideoPlayer's target texture to a RenderTexture
+                RenderTexture renderTexture = new RenderTexture(1920, 1080, 0); // Initial size, will be adjusted
+                videoPlayer.targetTexture = renderTexture;
+                rawImage.texture = renderTexture;
+
+                // Adjust the size of RawImage based on the video resolution
+                videoPlayer.prepareCompleted += (VideoPlayer vp) =>
+                {
+                    // Get the video resolution
+                    int videoWidth = (int)vp.width;
+                    int videoHeight = (int)vp.height;
+
+                    // Adjust the RenderTexture and RawImage size
+                    renderTexture.Release();
+                    renderTexture.width = videoWidth;
+                    renderTexture.height = videoHeight;
+                    renderTexture.Create();
+
+                    rawImage.rectTransform.sizeDelta = new Vector2(videoWidth, videoHeight);
+                };
+
+                // Prepare the video player to trigger the prepareCompleted event
+                videoPlayer.Prepare();
+
+                // Set the position and rotation of the videoContent
+                videoContent.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera;
+                videoContent.transform.rotation = Quaternion.LookRotation(videoContent.transform.position - Camera.main.transform.position);
+
+                currentAnchorObject = videoDisplay;
+            }
+        }, "Select a video", "mp4");
     }
 }
