@@ -1,6 +1,12 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+public enum AnchorType
+{
+    Text,
+    Media,
+    Preset
+}
 
 [Serializable]
 public class MapData
@@ -30,7 +36,8 @@ public class Floor
 public class AnchorData
 {
     public string anchorID;
-    public int contentIndex;
+    public AnchorType anchorType;
+    public string anchorData;
 }
 
 [Serializable]

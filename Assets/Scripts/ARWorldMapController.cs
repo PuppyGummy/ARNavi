@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine;
 using UnityEngine.UI;
 #if UNITY_IOS
 using System.Collections;
@@ -125,6 +124,8 @@ namespace UnityEngine.XR.ARFoundation.Samples
             data.Dispose();
             worldMap.Dispose();
             Log($"ARWorldMap written to {path}");
+
+            FirebaseManager.SaveWorldMap(path);
         }
 
         IEnumerator Load()
@@ -137,6 +138,8 @@ namespace UnityEngine.XR.ARFoundation.Samples
             }
 
             FileStream file;
+            // wait until the file is downloaded
+
             try
             {
                 file = File.Open(path, FileMode.Open);

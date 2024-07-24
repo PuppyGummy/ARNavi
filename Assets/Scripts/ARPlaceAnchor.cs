@@ -41,6 +41,7 @@ public class ARPlaceAnchor : MonoBehaviour
     private GameObject currentAnchorObject;
     private bool isPlacingContent = false;
     private float distanceFromCamera = 1.0f;
+    private AnchorData currentAnchorData;
 
 
     public ARAnchorManager anchorManager
@@ -102,7 +103,6 @@ public class ARPlaceAnchor : MonoBehaviour
             {
                 if (IsPointerOverUIObject(touch))
                 {
-                    Debug.Log("Touch over UI");
                     return;
                 }
 #if UNITY_EDITOR
@@ -115,29 +115,25 @@ public class ARPlaceAnchor : MonoBehaviour
                 {
                     GameObject prefab = Instantiate(contents[1], Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera, Quaternion.identity);
                     CreateAnchor(prefab);
-                    Debug.Log("Anchor created");
                 }
 #endif
                 List<ARRaycastHit> hits = new List<ARRaycastHit>();
                 if (raycastManager.Raycast(touch.position, hits))
                 {
                     ARRaycastHit hit = hits[0];
-                    // if (canEditAnchors && DetectAnchor(hit.pose.position))
                     if (canEditAnchors && DetectAnchor(touch.position))
                     {
                         Debug.Log("Anchor detected");
                     }
-                    else if (canPlaceAnchors)
-                    {
-                        CreateAnchor(hit);
-                        Debug.Log("Anchor created");
-                    }
+                    // else if (canPlaceAnchors)
+                    // {
+                    //     CreateAnchor(hit);
+                    //     Debug.Log("Anchor created");
+                    // }
                     else
                     {
-                        Debug.Log("Deselecting");
                         if (currentAnchor != null)
                         {
-                            // currentAnchor.GetComponent<Outline>().enabled = false;
                             currentAnchor = null;
                             transformUI.SetActive(false);
                         }
@@ -167,20 +163,13 @@ public class ARPlaceAnchor : MonoBehaviour
     }
     private bool DetectAnchor(Vector2 touchPosition)
     {
-        Debug.Log("Detecting anchor");
         Ray ray = Camera.main.ScreenPointToRay(touchPosition);
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit))
         {
-            bool colliderNotNull = hit.collider != null;
-            bool anchorNotNull = hit.collider.GetComponent<ARAnchor>() != null;
-            Debug.Log("hit.gameObject: " + hit.collider.gameObject);
-            Debug.Log("hit.collider != null: " + colliderNotNull);
-            Debug.Log("hit.collider.GetComponent<ARAnchor>() != null: " + anchorNotNull);
-            if (colliderNotNull && anchorNotNull)
+            if (hit.collider != null && hit.collider.GetComponent<ARAnchor>() != null)
             {
-                Debug.Log("Anchor hit");
                 currentAnchor = hit.collider.GetComponent<ARAnchor>();
                 SetCurrentAnchor(currentAnchor);
                 return true;
@@ -188,74 +177,6 @@ public class ARPlaceAnchor : MonoBehaviour
             return false;
         }
         return false;
-    }
-    // private bool DetectAnchor(Vector3 touchPosition)
-    // {
-    //     foreach (ARAnchor anchor in m_Anchors)
-    //     {
-    //         Vector3 screenPos = Camera.main.WorldToScreenPoint(anchor.transform.position);
-    //         if (Vector3.Distance(screenPos, touchPosition) < 50)
-    //         {
-    //             currentAnchor = anchor;
-    //             SetCurrentAnchor(anchor);
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    private void CreateAnchor(ARRaycastHit arRaycastHit)
-    {
-        ARAnchor anchor;
-
-        // If we hit a plane, try to "attach" the anchor to the plane
-        if (m_AnchorManager.descriptor.supportsTrackableAttachments && arRaycastHit.trackable is ARPlane plane)
-        {
-            if (contents != null && contentIndex < contents.Length)
-            {
-                var oldPrefab = m_AnchorManager.anchorPrefab;
-                m_AnchorManager.anchorPrefab = contents[contentIndex];
-                anchor = m_AnchorManager.AttachAnchor(plane, new Pose(new Vector3(arRaycastHit.pose.position.x, contentHeight, arRaycastHit.pose.position.z), Quaternion.Euler(0, 90, 0)));
-                m_AnchorManager.anchorPrefab = oldPrefab;
-                AnchorData anchorData = new AnchorData
-                {
-                    anchorID = anchor.trackableId.ToString(),
-                    contentIndex = contentIndex,
-                };
-                anchorDataList.anchors.Add(anchorData);
-                contentIndex++;
-            }
-            else
-            {
-                anchor = m_AnchorManager.AttachAnchor(plane, new Pose(new Vector3(arRaycastHit.pose.position.x, contentHeight, arRaycastHit.pose.position.z), Quaternion.Euler(0, 90, 0)));
-            }
-
-            FinalizePlacedAnchor(anchor);
-            SetCurrentAnchor(anchor);
-            return;
-        }
-
-        // Otherwise, just create a regular anchor at the hit pose
-        if (contents != null)
-        {
-            var anchorPrefab = Instantiate(contents[contentIndex], new Vector3(arRaycastHit.pose.position.x, contentHeight, arRaycastHit.pose.position.z), Quaternion.Euler(0, 90, 0));
-            anchor = ComponentUtils.GetOrAddIf<ARAnchor>(anchorPrefab, true);
-            AnchorData anchorData = new AnchorData
-            {
-                anchorID = anchor.trackableId.ToString(),
-                contentIndex = contentIndex,
-            };
-            anchorDataList.anchors.Add(anchorData);
-            contentIndex++;
-        }
-        else
-        {
-            var anchorPrefab = new GameObject("Anchor");
-            anchorPrefab.transform.SetPositionAndRotation(new Vector3(arRaycastHit.pose.position.x, contentHeight, arRaycastHit.pose.position.z), Quaternion.Euler(0, 90, 0));
-            anchor = anchorPrefab.AddComponent<ARAnchor>();
-        }
-        FinalizePlacedAnchor(anchor);
-        SetCurrentAnchor(anchor);
     }
 
     void FinalizePlacedAnchor(ARAnchor anchor)
@@ -266,18 +187,25 @@ public class ARPlaceAnchor : MonoBehaviour
         anchor.tag = "POI";
         m_Anchors.Add(anchor);
         currentAnchor = anchor;
-
-        // Outline outline = anchor.AddComponent<Outline>();
-        // outline.effectColor = Color.blue;
-        // outline.effectDistance = new Vector2(0.01f, 0.01f);
     }
     public void SaveAnchors()
     {
-        SaveLoadManager.SaveAnchors(anchorDataList);
+        // find all the image and video anchors and upload the files to Firebase Storage
+        foreach (var anchorData in anchorDataList.anchors)
+        {
+            if (anchorData.anchorType == AnchorType.Media)
+            {
+                Debug.Log("Uploading media to Firebase Storage...");
+                
+                string path = anchorData.anchorData;
+                FirebaseManager.UploadAndSaveMedia(path, anchorData);
+            }
+        }
+        FirebaseManager.SaveAnchorDataList(anchorDataList);
     }
     public void LoadAnchors()
     {
-        AnchorDataList anchorDataList = SaveLoadManager.LoadAnchors();
+        AnchorDataList anchorDataList = FirebaseManager.LoadAnchorDataList();
         if (anchorDataList != null)
         {
             foreach (var anchorData in anchorDataList.anchors)
@@ -289,7 +217,7 @@ public class ARPlaceAnchor : MonoBehaviour
                         GameObject content;
                         if (contents != null)
                         {
-                            content = Instantiate(contents[anchorData.contentIndex], anchor.transform.position, anchor.transform.rotation);
+                            content = Instantiate(Resources.Load<GameObject>("Presets/" + anchorData.anchorData), anchor.transform.position, anchor.transform.rotation);
                         }
                         else
                         {
@@ -323,9 +251,6 @@ public class ARPlaceAnchor : MonoBehaviour
     }
     public void SetCurrentAnchor(ARAnchor anchor)
     {
-        // if (currentAnchor != null)
-        //     currentAnchor.GetComponent<Outline>().enabled = false;
-        // anchor.GetComponent<Outline>().enabled = true;
         UpdateInputFields();
         transformUI.SetActive(true);
     }
@@ -363,13 +288,18 @@ public class ARPlaceAnchor : MonoBehaviour
         {
             // delete the old anchor and create a new one
             GameObject currentContent = currentAnchor.gameObject;
+            foreach (var anchorData in anchorDataList.anchors)
+            {
+                if (anchorData.anchorID == currentAnchor.trackableId.ToString())
+                {
+                    anchorDataList.anchors.Remove(anchorData);
+                    break;
+                }
+            }
             m_Anchors.Remove(currentAnchor);
             // destroy the anchor component
             DestroyImmediate(currentContent.GetComponent<ARAnchor>());
-            Debug.Log("currentContent.GetComponent<ARAnchor>() == null: " + (currentContent.GetComponent<ARAnchor>() == null));
             DestroyImmediate(currentContent.GetComponent<BoxCollider>());
-            // DestroyImmediate(currentContent.GetComponent<Outline>());
-            // Debug.Log("currentContent.GetComponent<Outline>() == null: " + (currentContent.GetComponent<Outline>() == null));
 
             float valueX = float.Parse(inputX.text);
             float valueY = float.Parse(inputY.text);
@@ -389,13 +319,20 @@ public class ARPlaceAnchor : MonoBehaviour
                     break;
             }
             CreateAnchor(currentContent);
-            // currentContent.GetComponent<Outline>().enabled = false;
-            // Debug.Log("currentContent.GetComponent<Outline>().enabled: " + (currentContent.GetComponent<Outline>().enabled));
         }
         transformUI.SetActive(false);
     }
     private void RemoveAnchor(ARAnchor anchor)
     {
+        // find the anchor data with the same ID and remove it
+        foreach (var anchorData in anchorDataList.anchors)
+        {
+            if (anchorData.anchorID == anchor.trackableId.ToString())
+            {
+                anchorDataList.anchors.Remove(anchorData);
+                break;
+            }
+        }
         m_Anchors.Remove(anchor);
         Destroy(anchor.gameObject);
     }
@@ -412,13 +349,33 @@ public class ARPlaceAnchor : MonoBehaviour
     {
         // ARAnchor anchor = ComponentUtils.GetOrAddIf<ARAnchor>(obj, true);
         ARAnchor anchor = obj.AddComponent<ARAnchor>();
-        Debug.Log("Anchor added to object: " + (anchor != null));
-        // AnchorData anchorData = new AnchorData
-        // {
-        //     anchorID = anchor.trackableId.ToString(),
-        //     contentIndex = contentIndex,
-        // };
-        // anchorDataList.anchors.Add(anchorData);
+
+        if (currentAnchorData != null)
+        {
+            currentAnchorData.anchorID = anchor.trackableId.ToString();
+            // switch (currentAnchorData.anchorType)
+            // {
+            //     case AnchorType.Text:
+            //         currentAnchorData.anchorData = obj.GetComponent<TextMeshPro>().text;
+            //         break;
+            //     case AnchorType.Image:
+            //         // currentAnchorData.anchorData = obj.GetComponent<SpriteRenderer>().sprite.name;
+            //         break;
+            //     case AnchorType.Video:
+            //         // currentAnchorData.anchorData = obj.GetComponent<VideoPlayer>().url;
+            //         break;
+            //     case AnchorType.Preset:
+            //         // currentAnchorData.anchorData = obj.name;
+            //         break;
+            // }
+            if (currentAnchorData.anchorType == AnchorType.Text)
+            {
+                currentAnchorData.anchorData = obj.GetComponent<TextMeshPro>().text;
+            }
+
+            anchorDataList.anchors.Add(currentAnchorData);
+        }
+
         FinalizePlacedAnchor(anchor);
     }
     public void ConfirmCreateAnchor()
@@ -444,8 +401,14 @@ public class ARPlaceAnchor : MonoBehaviour
         text.fontSize = 36;
         text.alignment = TextAlignmentOptions.Center;
         textContent.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera;
-        //make the text face the camera
+        // make the text face the camera
         textContent.transform.rotation = Quaternion.LookRotation(textContent.transform.position - Camera.main.transform.position);
+        currentAnchorData = new AnchorData
+        {
+            anchorID = "",
+            anchorType = AnchorType.Text,
+            anchorData = ""
+        };
 
         currentAnchorObject = textContent;
     }
@@ -522,6 +485,13 @@ public class ARPlaceAnchor : MonoBehaviour
         preset.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera;
         preset.transform.rotation = Quaternion.LookRotation(preset.transform.position - Camera.main.transform.position);
 
+        currentAnchorData = new AnchorData
+        {
+            anchorID = "",
+            anchorType = AnchorType.Preset,
+            anchorData = preset.name
+        };
+
         currentAnchorObject = preset;
     }
     public void OnCreatePhotoButtonClicked()
@@ -550,6 +520,13 @@ public class ARPlaceAnchor : MonoBehaviour
 
                 imageContent.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera;
                 imageContent.transform.rotation = Quaternion.LookRotation(imageContent.transform.position - Camera.main.transform.position);
+
+                currentAnchorData = new AnchorData
+                {
+                    anchorID = "",
+                    anchorType = AnchorType.Media,
+                    anchorData = path
+                };
 
                 currentAnchorObject = imageContent;
             }
@@ -607,6 +584,13 @@ public class ARPlaceAnchor : MonoBehaviour
                 // Set the position and rotation of the videoContent
                 videoContent.transform.position = Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera;
                 videoContent.transform.rotation = Quaternion.LookRotation(videoContent.transform.position - Camera.main.transform.position);
+
+                currentAnchorData = new AnchorData
+                {
+                    anchorID = "",
+                    anchorType = AnchorType.Media,
+                    anchorData = path
+                };
 
                 currentAnchorObject = videoDisplay;
             }

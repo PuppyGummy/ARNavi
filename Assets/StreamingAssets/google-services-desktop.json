@@ -1,0 +1,31 @@
+{
+  "project_info": {
+    "project_number": "291064496886",
+    "project_id": "arnavi-89df3",
+    "storage_bucket": "arnavi-89df3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:291064496886:ios:95c9ecb67bfde1603762d7",
+        "android_client_info": {
+          "package_name": "ca.thecdm.arnavi"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkDN9lrAo-1rcPhEKwrCptJkrHGyIAlLM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 0
+        },
+        "appinvite_service": {
+          "status": 1
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
