@@ -26,6 +26,17 @@ public class SaveLoadManager : MonoBehaviour
         return null;
     }
 
+    public static Sprite LoadSearchImage(string pathname)
+    {
+        Sprite searchImage = Resources.Load<Sprite>("SearchResultImages/" + pathname);
+        if(searchImage != null)
+        {
+            return searchImage;
+        }
+        Debug.Log("Search Result Image not found at Resources/SearchResultImages/" + pathname);
+        return null;
+    }
+
     public static void SaveAnchors(AnchorDataList anchorDataList)
     {
         string json = JsonUtility.ToJson(anchorDataList);

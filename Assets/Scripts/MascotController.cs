@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using UnityEngine.UI;
 
+
 public class MascotController : MonoBehaviour
 {
     [SerializeField] private Transform mascotTransform;
@@ -15,6 +16,22 @@ public class MascotController : MonoBehaviour
     [SerializeField] private GameObject mascotsParent;
     [SerializeField] private Button switchMascotButton;
 
+    [SerializeField] private Button openBuddyMenu;
+    [SerializeField] private Button buddyMenuSelectedBuddy;
+    [SerializeField] private Button switchToSun;
+    [SerializeField] private Button switchToWater;
+    [SerializeField] private Button switchToLeaf;
+    [SerializeField] private Button buddyOffButton;
+    [SerializeField] private GameObject buddyMenu;
+    [SerializeField] private Sprite leafBuddyFocus;
+    [SerializeField] private Sprite waterBuddyFocus;
+    [SerializeField] private Sprite sunBuddyFocus;
+    [SerializeField] private Sprite buddyOff;
+    [SerializeField] private Button showPOIButton;
+
+    [SerializeField] private GameObject menuSlots;
+
+
     private List<Transform> mascots = new List<Transform>();
     private NavMeshPath path;
     private GameObject userIndicator;
@@ -26,6 +43,12 @@ public class MascotController : MonoBehaviour
     private float time;
     public bool mascotActive = false;
     private int currentMascotIndex = 0;
+
+    private bool sunOn = true;
+    private bool leafOn = false;
+    private bool waterOn = false;
+    private bool buddyDisabled = false;
+    
 
     public static MascotController Instance;
     private void Awake()
@@ -51,7 +74,22 @@ public class MascotController : MonoBehaviour
         userIndicator = NavigationManager.Instance.userIndicator;
         agent = mascotTransform.GetComponent<NavMeshAgent>();
         animator = mascotTransform.GetComponent<Animator>();
-        switchMascotButton.gameObject.SetActive(mascotActive);
+        //switchMascotButton.gameObject.SetActive(mascotActive);
+        switchMascotButton.gameObject.SetActive(true);
+        //set the sun as the selected mascot by default
+        sunOn = true;
+        leafOn = false;
+        waterOn = false;
+        buddyDisabled = false;
+        bool _fromExplore = SearchControl.GetFromExplore();
+        //if not navigating from explore mode, turn off the explore exclusive features
+        if (_fromExplore == false)
+        {
+            openBuddyMenu.gameObject.SetActive(false);
+            showPOIButton.gameObject.SetActive(false);
+
+        }
+
     }
 
     void Update()
@@ -157,22 +195,156 @@ public class MascotController : MonoBehaviour
     }
     public void ToggleMascot()
     {
-        mascotActive = !mascotActive;
+        //turn the mascot off
+        mascotActive = false;
         mascotTransform.gameObject.SetActive(mascotActive);
-        switchMascotButton.gameObject.SetActive(mascotActive);
+        ClearBuddySelection();
+        buddyDisabled = true;
+        buddyMenu.gameObject.SetActive(false);
+        openBuddyMenu.gameObject.SetActive(true);
+        buddyMenuSelectedBuddy.image.sprite = buddyOff;
+        openBuddyMenu.image.sprite = buddyOff;
+        UpdateMenuSlots();
     }
+    //opens the menu to select a different mascot or toggle the mascot off
+    public void OpenMascotMenu()
+    {
+        //disable the open mascot menu button
+        openBuddyMenu.gameObject.SetActive(false);
+        //enable the menu
+        buddyMenu.gameObject.SetActive(true);
+        //when an option is selected the menu will be disabled and replaced with the correct mascot based on the mascot index
+    }
+    //Close the mascot selection menu
+    public void CloseMascotMenu()
+    {
+        openBuddyMenu.gameObject.SetActive(true);
+        buddyMenu.gameObject.SetActive(false);
+    }
+    public void UpdateMenuSlots()
+    {
+        bool sunSet = false;
+        bool leafSet = false;
+        bool waterSet = false;
+        bool offSet = false;
+
+        foreach(Transform slot in menuSlots.transform)
+        {
+            Debug.Log(slot.name);
+        }
+        foreach (Transform slot in menuSlots.transform)
+        {
+         
+            bool slotFilled = false;
+            //clear menu slot
+            foreach (Transform button in slot.transform)
+            {
+                GameObject.Destroy(button.gameObject);
+            }
+            if(!slotFilled && !sunOn && !sunSet)
+            {
+                slotFilled = true;
+                sunSet = true;
+                Button newButton = Instantiate(switchToSun, slot.transform);
+                newButton.GetComponent<Button>().onClick.AddListener(() => SetBuddyToSun());
+
+            }
+            if(!slotFilled && !leafOn && !leafSet)
+            {
+                slotFilled = true;
+                leafSet = true;
+                Button newButton = Instantiate(switchToLeaf, slot.transform);
+                newButton.GetComponent<Button>().onClick.AddListener(() => SetBuddyToLeaf());
+
+            }
+            if(!slotFilled && !waterOn && !waterSet)
+            {
+                slotFilled = true;
+                waterSet = true;
+                Button newButton = Instantiate(switchToWater, slot.transform);
+                newButton.GetComponent<Button>().onClick.AddListener(() => SetBuddyToWater());
+
+            }
+            if(!slotFilled && !buddyDisabled && !offSet)
+            {
+                slotFilled = true;
+                offSet = true;
+                Button newButton = Instantiate(buddyOffButton, slot.transform);
+                newButton.GetComponent<Button>().onClick.AddListener(() => ToggleMascot());
+
+            }
+        }
+    }
+    public void SetBuddyToLeaf()
+    {
+        mascotActive = true;
+        mascotTransform.gameObject.SetActive(mascotActive);
+        ClearBuddySelection();
+        leafOn = true;
+        //deactivate the menu and reactivate the open menu button
+        buddyMenu.gameObject.SetActive(false);
+        openBuddyMenu.gameObject.SetActive(true);
+        //change sprite of open buddy menu to the new sprite
+        openBuddyMenu.image.sprite = leafBuddyFocus;
+        currentMascotIndex = 0;
+        ChangeMascot();
+        //change the sprite of the selected buddy in the menu to the new sprite
+        buddyMenuSelectedBuddy.image.sprite = leafBuddyFocus;
+        UpdateMenuSlots();
+    }
+
+    public void SetBuddyToWater()
+    {
+        mascotActive = true;
+        mascotTransform.gameObject.SetActive(mascotActive);
+        ClearBuddySelection();
+        waterOn = true;
+        //deactivate the menu and reactivate the open menu button
+        buddyMenu.gameObject.SetActive(false);
+        openBuddyMenu.gameObject.SetActive(true);
+        //change sprite of open buddy menu to the new sprite
+        openBuddyMenu.image.sprite = waterBuddyFocus;
+        currentMascotIndex = 1;
+        ChangeMascot();
+        //change the sprite of the selected buddy in the menu to the new sprite
+        buddyMenuSelectedBuddy.image.sprite = waterBuddyFocus;
+        UpdateMenuSlots();
+    }
+
+    public void SetBuddyToSun()
+    {
+        mascotActive = true;
+        mascotTransform.gameObject.SetActive(mascotActive);
+        ClearBuddySelection();
+        sunOn = true;
+        //deactivate the menu and reactivate the open menu button
+        buddyMenu.gameObject.SetActive(false);
+        openBuddyMenu.gameObject.SetActive(true);
+        //change sprite of open buddy menu to the new sprite
+        openBuddyMenu.image.sprite = sunBuddyFocus;
+        currentMascotIndex = 0;
+        ChangeMascot();
+        //change the sprite of the selected buddy in the menu to the new sprite
+        buddyMenuSelectedBuddy.image.sprite = sunBuddyFocus;
+        UpdateMenuSlots();
+    }
+
     public void ChangeMascot()
     {
-        currentMascotIndex++;
-        if (currentMascotIndex >= mascots.Count)
-        {
-            currentMascotIndex = 0;
-        }
+        //instead have each of the mascot buttons change the current mascot index to the appropriate value and run the rest of the code as usual
         mascotTransform.gameObject.SetActive(false);
         mascotTransform = mascots[currentMascotIndex];
         mascotTransform.gameObject.SetActive(true);
         setMascotAtFirstTime = false;
         agent = mascotTransform.GetComponent<NavMeshAgent>();
         animator = mascotTransform.GetComponent<Animator>();
+    }
+
+    private void ClearBuddySelection()
+    {
+        sunOn = false;
+        leafOn = false;
+        waterOn = false;
+        buddyDisabled = false;
     }
 }
