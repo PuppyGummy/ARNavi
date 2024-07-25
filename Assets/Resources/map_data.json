@@ -1,57 +1,72 @@
 {
     "floors": [
         {
-            "floorName": "First Floor",
+            "floorName": "F1",
             "targetsOnFloor": [
                 {
                     "targetName": "Project Room 2",
                     "targetPosition": {
                         "x": -21.899999618530275,
-                        "y": 1.0,
+                        "y": 0.5,
                         "z": -2.070000648498535
                     },
-                    "tag": "Medical"
+                    "tag": "Medical",
+                    "addressInfo": "Project Room 2 in the CDM",
+                    "targetId": 0,
+                    "imgPath": "Project Room 2-0"
                 },
                 {
                     "targetName": "Project Room 3",
                     "targetPosition": {
-                        "x": -21.850000381469728,
-                        "y": 1.0,
-                        "z": -13.460000991821289
+                        "x": -21.899999618530275,
+                        "y": 0.5,
+                        "z": -13.612000465393067
                     },
-                    "tag": "Medical"
+                    "tag": "Medical",
+                    "addressInfo": "Project Room 3 in the CDM",
+                    "targetId": 1,
+                    "imgPath": "Project Room 3-1"
                 },
                 {
                     "targetName": "Project room 8",
                     "targetPosition": {
                         "x": -3.939999580383301,
-                        "y": 1.0,
+                        "y": 0.5,
                         "z": -13.570000648498536
                     },
-                    "tag": "Medical"
+                    "tag": "Medical",
+                    "addressInfo": "Project Room 8 in the CDM",
+                    "targetId": 2,
+                    "imgPath": "Project room 8-2"
                 },
                 {
                     "targetName": "Classroom A",
                     "targetPosition": {
                         "x": -25.689998626708986,
-                        "y": 1.0,
+                        "y": 0.5,
                         "z": -5.940000534057617
                     },
-                    "tag": "Amenities"
+                    "tag": "Amenities",
+                    "addressInfo": "Classroom A in the CDM",
+                    "targetId": 3,
+                    "imgPath": "Classroom A-3"
                 },
                 {
                     "targetName": "Classroom B",
                     "targetPosition": {
                         "x": -25.689998626708986,
-                        "y": 1.0,
+                        "y": 0.5,
                         "z": -9.890000343322754
                     },
-                    "tag": "Amenities"
+                    "tag": "Amenities",
+                    "addressInfo": "Classroom B in the CDM",
+                    "targetId": 4,
+                    "imgPath": "Classroom B-4"
                 }
             ]
         },
         {
-            "floorName": "Second Floor",
+            "floorName": "F2",
             "targetsOnFloor": [
                 {
                     "targetName": "Window",
@@ -60,7 +75,10 @@
                         "y": 1.0,
                         "z": -17.130001068115236
                     },
-                    "tag": "Fun"
+                    "tag": "Fun",
+                    "addressInfo": "A window",
+                    "targetId": 5,
+                    "imgPath": "Window-5"
                 },
                 {
                     "targetName": "Bathroom",
@@ -69,7 +87,10 @@
                         "y": 1.0,
                         "z": -19.440000534057618
                     },
-                    "tag": "Fun"
+                    "tag": "Fun",
+                    "addressInfo": "A bathroom.",
+                    "targetId": 6,
+                    "imgPath": "Bathroom-6"
                 },
                 {
                     "targetName": "Kitchen",
@@ -78,7 +99,10 @@
                         "y": 1.0,
                         "z": -15.600000381469727
                     },
-                    "tag": "Fun"
+                    "tag": "Fun",
+                    "addressInfo": "A kitchen",
+                    "targetId": 7,
+                    "imgPath": "Kitchen-7"
                 }
             ]
         }
@@ -91,7 +115,10 @@
                 "y": 0.5,
                 "z": 0.20999908447265626
             },
-            "tag": ""
+            "tag": "",
+            "addressInfo": "",
+            "targetId": 0,
+            "imgPath": ""
         },
         {
             "targetName": "ProjRoom4",
@@ -100,7 +127,10 @@
                 "y": 0.5,
                 "z": -1.2299995422363282
             },
-            "tag": ""
+            "tag": "",
+            "addressInfo": "",
+            "targetId": 0,
+            "imgPath": ""
         },
         {
             "targetName": "Corridor(near Proj room 8)",
@@ -109,7 +139,10 @@
                 "y": 0.5,
                 "z": -8.410000801086426
             },
-            "tag": ""
+            "tag": "",
+            "addressInfo": "",
+            "targetId": 0,
+            "imgPath": ""
         },
         {
             "targetName": "Corridor(near Proj room 3)",
@@ -118,25 +151,34 @@
                 "y": 0.5,
                 "z": -8.450000762939454
             },
-            "tag": ""
+            "tag": "",
+            "addressInfo": "",
+            "targetId": 0,
+            "imgPath": ""
         },
         {
             "targetName": "ClassroomB",
             "targetPosition": {
-                "x": -25.25,
+                "x": -25.920000076293947,
                 "y": 0.5,
-                "z": -12.239999771118164
+                "z": -10.829999923706055
             },
-            "tag": ""
+            "tag": "",
+            "addressInfo": "",
+            "targetId": 0,
+            "imgPath": ""
         },
         {
             "targetName": "ClassroomA",
             "targetPosition": {
-                "x": -25.25,
+                "x": -25.920000076293947,
                 "y": 0.5,
-                "z": -3.8000001907348635
+                "z": -5.160000801086426
             },
-            "tag": ""
+            "tag": "",
+            "addressInfo": "",
+            "targetId": 0,
+            "imgPath": ""
         },
         {
             "targetName": "SecondFloorStartPoint",
@@ -145,7 +187,10 @@
                 "y": 0.0,
                 "z": -16.0
             },
-            "tag": ""
+            "tag": "",
+            "addressInfo": "",
+            "targetId": 0,
+            "imgPath": ""
         },
         {
             "targetName": "FirstFloorStartPoint",
@@ -154,7 +199,10 @@
                 "y": 0.0,
                 "z": 0.00099945068359375
             },
-            "tag": ""
+            "tag": "",
+            "addressInfo": "",
+            "targetId": 0,
+            "imgPath": ""
         }
     ]
 }

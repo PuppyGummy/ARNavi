@@ -22,9 +22,10 @@ public class Target
     public string targetName;
     public Vector3 targetPosition;
     public string tag;
-    //string addressInfo;?
-    //string imagepath;?
-    //idk about imagepath it might be easier to just do
+    public string addressInfo;
+    public int targetId;
+    public string imgPath;
+   
 }
 [Serializable]
 public class Floor

@@ -7,6 +7,7 @@ using UnityEngine.AI;
 using UnityEngine.XR.ARFoundation;
 using Unity.XR.CoreUtils;
 using UnityEngine.UI;
+using Unity.VisualScripting;
 
 public class NavigationManager : MonoBehaviour
 {
@@ -79,8 +80,8 @@ public class NavigationManager : MonoBehaviour
         FillTargetDropdown();
 
         //set the values chosen in the main menu screen
-        // SetFloorInitial();
-        // SetTargetInitial();
+        SetFloorInitial();
+        SetTargetInitial();
     }
     private void Update()
     {
@@ -98,48 +99,62 @@ public class NavigationManager : MonoBehaviour
         HasArrived();
     }
     //after getting to navigation screen from the selection page, change the target to reflect the choice
-    // public void SetTargetInitial()
-    // { 
+     public void SetTargetInitial()
+    {
 
-    //     //get current target set in main menu page
-    //     Target tarSelect = SearchControl.GetCurrentTarget();
-    //     //iterate through all options in the targetlist
-    //     for (int i = 0; i<targetListDropdown.options.Count; i++)
-    //     {
-    //         //if the name matches, set the dropdown value to the corresponding value
-    //         if (targetListDropdown.options[i].text == tarSelect.targetName)
-    //         {
-    //             targetListDropdown.value = i;
-    //             break;
-    //         }
+        //get current target set in main menu page
+        Target tarSelect = SearchControl.GetCurrentTarget();
+        if (tarSelect == null)
+        {
+            targetListDropdown.value = 0;
+        }
+        else
+        {
+            //iterate through all options in the targetlist
+            for (int i = 0; i < targetListDropdown.options.Count; i++)
+            {
+                //if the name matches, set the dropdown value to the corresponding value
+                if (targetListDropdown.options[i].text == tarSelect.targetName)
+                {
+                    targetListDropdown.value = i;
+                    break;
+                }
+            }
+        }
+        //set current navigation target accrording to the newly set dropdown
+        SetCurrentNavigationTarget();
 
-    //     }
-    //     //set current navigation target accrording to the newly set dropdown
-    //     SetCurrentNavigationTarget();
+    }
 
-    //  }
-
-    // //after getting to the navigation screen from the selection page, change the floor to reflect the choice
-    // public void SetFloorInitial()
-    // {
-    //     //clear the targetlist and targetposition
-    //     targetList.Clear();
-    //     targetPosition = Vector3.zero;
-    //     //get the floor that was selected in the main menu screen
-    //     Floor floorSelection = SearchControl.GetCurrentFloor();
-    //     //iterate through the list of floors
-    //     for (int i = 0; i < floorListDropdown.options.Count; i++)
-    //     {
-    //         //check if name of option matching the selected floor and set accordingly
-    //         if (floorListDropdown.options[i].text == floorSelection.floorName)
-    //         {
-    //             floorListDropdown.value = i;
-    //             break;
-    //         }
-    //     }
-    //     //set current floor according to the newly set dropdown
-    //     SetCurrentFloor();
-    // }
+    //after getting to the navigation screen from the selection page, change the floor to reflect the choice
+    public void SetFloorInitial()
+    {
+        //clear the targetlist and targetposition
+        targetList.Clear();
+        targetPosition = Vector3.zero;
+        //get the floor that was selected in the main menu screen
+        Floor floorSelection = SearchControl.GetCurrentFloor();
+        if (floorSelection == null)
+        {
+            floorListDropdown.value = 0;
+        }
+        else
+        {
+            //iterate through the list of floors
+            for (int i = 0; i < floorListDropdown.options.Count; i++)
+            {
+                //check if name of option matching the selected floor and set accordingly
+                if (floorListDropdown.options[i].text == floorSelection.floorName)
+                {
+                    floorListDropdown.value = i;
+                    break;
+                }
+            }
+        }
+        
+        //set current floor according to the newly set dropdown
+        SetCurrentFloor();
+    }
 
     public void SetLineYOffsetText()
     {
@@ -246,6 +261,7 @@ public class NavigationManager : MonoBehaviour
         };
 
         //iterate through all floors
+        int id = 0;
         foreach (var floor in floorList)
         {
             //create a newFloor with the name of the current floor iteration
@@ -263,9 +279,12 @@ public class NavigationManager : MonoBehaviour
 
                     targetName = myTarget.name,
                     targetPosition = myTarget.transform.position,
-                    tag = myTarget.tag
-
+                    addressInfo = Variables.Object(myTarget).Get<string>("description"),
+                    tag = myTarget.tag,
+                    targetId = id,
+                    imgPath = myTarget.name + "-" + id
                 };
+                id++;
                 newFloor.targetsOnFloor.Add(targetToAdd);
 
             }
