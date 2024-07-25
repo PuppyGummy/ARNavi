@@ -4,7 +4,8 @@ using UnityEngine;
 public enum AnchorType
 {
     Text,
-    Media,
+    Image,
+    Video,
     Preset
 }
 

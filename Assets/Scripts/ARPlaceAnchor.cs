@@ -8,6 +8,8 @@ using UnityEngine.UI;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine.Video;
+using System.IO;
+using System.Collections;
 
 public class ARPlaceAnchor : MonoBehaviour
 {
@@ -22,7 +24,7 @@ public class ARPlaceAnchor : MonoBehaviour
     private ARRaycastManager raycastManager;
 
     private List<ARAnchor> m_Anchors = new();
-    public GameObject[] contents;
+    public GameObject[] presets;
     public GameObject contentParent;
     private int contentIndex = 0;
     private float contentHeight = 0.6f;
@@ -113,7 +115,7 @@ public class ARPlaceAnchor : MonoBehaviour
                 }
                 else if (canPlaceAnchors)
                 {
-                    GameObject prefab = Instantiate(contents[1], Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera, Quaternion.identity);
+                    GameObject prefab = Instantiate(presets[1], Camera.main.transform.position + Camera.main.transform.forward * distanceFromCamera, Quaternion.identity);
                     CreateAnchor(prefab);
                 }
 #endif
@@ -190,54 +192,160 @@ public class ARPlaceAnchor : MonoBehaviour
     }
     public void SaveAnchors()
     {
-        // find all the image and video anchors and upload the files to Firebase Storage
-        foreach (var anchorData in anchorDataList.anchors)
-        {
-            if (anchorData.anchorType == AnchorType.Media)
-            {
-                Debug.Log("Uploading media to Firebase Storage...");
-                
-                string path = anchorData.anchorData;
-                FirebaseManager.UploadAndSaveMedia(path, anchorData);
-            }
-        }
-        FirebaseManager.SaveAnchorDataList(anchorDataList);
+        FirebaseManager.UploadAnchorDataList(anchorDataList);
     }
     public void LoadAnchors()
     {
-        AnchorDataList anchorDataList = FirebaseManager.LoadAnchorDataList();
-        if (anchorDataList != null)
+        FirebaseManager.DownloadAnchorDataList((downloadedAnchorDataList) =>
         {
-            foreach (var anchorData in anchorDataList.anchors)
+            if (downloadedAnchorDataList != null)
             {
-                foreach (var anchor in anchorManager.trackables)
+                anchorDataList = downloadedAnchorDataList;
+                if (anchorDataList != null)
                 {
-                    if (anchor.trackableId.ToString() == anchorData.anchorID)
+                    Debug.Log($"Number of anchor data: {anchorDataList.anchors.Count}");
+                    Debug.Log($"Number of trackables in anchorManager: {anchorManager.trackables.count}");
+
+                    foreach (var anchorData in anchorDataList.anchors)
                     {
-                        GameObject content;
-                        if (contents != null)
+                        Debug.Log($"Processing anchorData with ID: {anchorData.anchorID}");
+                        bool matchedAnchor = false;
+                        foreach (var anchor in anchorManager.trackables)
                         {
-                            content = Instantiate(Resources.Load<GameObject>("Presets/" + anchorData.anchorData), anchor.transform.position, anchor.transform.rotation);
-                        }
-                        else
-                        {
-                            content = Instantiate(m_Prefab, anchor.transform.position, anchor.transform.rotation);
+                            Debug.Log($"Comparing with anchor ID: {anchor.trackableId}");
+                            if (anchor.trackableId.ToString() == anchorData.anchorID)
+                            {
+                                matchedAnchor = true;
+                                GameObject content = null;
+                                Debug.Log($"Matching anchorData found: {anchorData.anchorID}, type: {anchorData.anchorType}");
+
+                                switch (anchorData.anchorType)
+                                {
+                                    case AnchorType.Text:
+                                        content = CreateTextContent(anchorData);
+                                        break;
+                                    case AnchorType.Image:
+                                        content = CreateImageContent(anchorData, anchor);
+                                        break;
+                                    case AnchorType.Video:
+                                        content = CreateVideoContent(anchorData, anchor);
+                                        break;
+                                    case AnchorType.Preset:
+                                        content = CreatePresetContent(anchorData, anchor);
+                                        break;
+                                }
+
+                                if (content != null)
+                                {
+                                    // Ensure content has ARAnchor component
+                                    var contentAnchor = content.GetComponent<ARAnchor>();
+                                    if (contentAnchor == null)
+                                    {
+                                        contentAnchor = content.AddComponent<ARAnchor>();
+                                    }
+
+                                    content.transform.SetParent(contentParent.transform);
+                                    m_Anchors.Add(anchor);
+                                    Debug.Log($"Content added for anchor ID: {anchor.trackableId}");
+                                }
+                                break; // Exit the inner foreach loop
+                            }
                         }
 
-                        // Ensure content has ARAnchor component
-                        var contentAnchor = content.GetComponent<ARAnchor>();
-                        if (contentAnchor == null)
+                        if (!matchedAnchor)
                         {
-                            contentAnchor = content.AddComponent<ARAnchor>();
+                            Debug.LogWarning($"No matching anchor found for anchorData ID: {anchorData.anchorID}");
                         }
-
-                        content.transform.SetParent(contentParent.transform);
-                        m_Anchors.Add(anchor);
-                        break;
                     }
                 }
             }
+            else
+            {
+                Debug.LogError("Failed to download anchor data.");
+            }
+        });
+    }
+
+    private GameObject CreateTextContent(AnchorData anchorData)
+    {
+        Debug.Log("Creating text content...");
+        var content = new GameObject("Text");
+        content.transform.SetParent(contentParent.transform);
+        content.transform.localScale = new Vector3(1f, 1f, 1f);
+        var text = content.AddComponent<TextMeshPro>();
+        text.text = anchorData.anchorData;
+        text.fontSize = 36;
+        text.alignment = TextAlignmentOptions.Center;
+        return content;
+    }
+
+    private GameObject CreateImageContent(AnchorData anchorData, ARAnchor anchor)
+    {
+        Debug.Log("Creating image content...");
+        string imagePath = SaveLoadManager.MediaSavePath + "/" + anchorData.anchorID + ".png";
+        GameObject content = null;
+
+        if (!File.Exists(imagePath))
+        {
+            Debug.Log("Image file not found. Downloading from firebase...");
+            StartCoroutine(SaveLoadManager.DownloadMedia(anchorData.anchorData, imagePath, (downloaded) =>
+            {
+                if (downloaded)
+                {
+                    Debug.Log("Image downloaded successfully.");
+                    CreateImageFromPath(imagePath, anchor);
+                }
+                else
+                {
+                    Debug.LogError("Failed to download image.");
+                }
+            }));
         }
+        else
+        {
+            CreateImageFromPath(imagePath, anchor);
+        }
+
+        return content;
+    }
+
+    private GameObject CreateVideoContent(AnchorData anchorData, ARAnchor anchor)
+    {
+        Debug.Log("Creating video content...");
+        string videoPath = SaveLoadManager.MediaSavePath + "/" + anchorData.anchorID + ".mp4";
+        GameObject content = null;
+
+        if (!File.Exists(videoPath))
+        {
+            Debug.Log("Video file not found. Downloading from firebase...");
+            StartCoroutine(SaveLoadManager.DownloadMedia(anchorData.anchorData, videoPath, (downloaded) =>
+            {
+                if (downloaded)
+                {
+                    Debug.Log("Video downloaded successfully.");
+                    CreateVideoFromPath(videoPath, anchor);
+                }
+                else
+                {
+                    Debug.LogError("Failed to download video.");
+                }
+            }));
+        }
+        else
+        {
+            CreateVideoFromPath(videoPath, anchor);
+        }
+
+        return content;
+    }
+
+    private GameObject CreatePresetContent(AnchorData anchorData, ARAnchor anchor)
+    {
+        Debug.Log("Creating preset content...");
+        var content = Instantiate(Resources.Load<GameObject>("Presets/" + anchorData.anchorData), anchor.transform.position, anchor.transform.rotation);
+        content.transform.SetParent(contentParent.transform);
+        content.transform.localScale = new Vector3(1f, 1f, 1f);
+        return content;
     }
     public void TogglePlaceAnchors()
     {
@@ -353,21 +461,7 @@ public class ARPlaceAnchor : MonoBehaviour
         if (currentAnchorData != null)
         {
             currentAnchorData.anchorID = anchor.trackableId.ToString();
-            // switch (currentAnchorData.anchorType)
-            // {
-            //     case AnchorType.Text:
-            //         currentAnchorData.anchorData = obj.GetComponent<TextMeshPro>().text;
-            //         break;
-            //     case AnchorType.Image:
-            //         // currentAnchorData.anchorData = obj.GetComponent<SpriteRenderer>().sprite.name;
-            //         break;
-            //     case AnchorType.Video:
-            //         // currentAnchorData.anchorData = obj.GetComponent<VideoPlayer>().url;
-            //         break;
-            //     case AnchorType.Preset:
-            //         // currentAnchorData.anchorData = obj.name;
-            //         break;
-            // }
+
             if (currentAnchorData.anchorType == AnchorType.Text)
             {
                 currentAnchorData.anchorData = obj.GetComponent<TextMeshPro>().text;
@@ -464,10 +558,10 @@ public class ARPlaceAnchor : MonoBehaviour
     private void LoadPresets()
     {
         // load presets from Resources/Presets folder
-        contents = Resources.LoadAll<GameObject>("Presets");
+        presets = Resources.LoadAll<GameObject>("Presets");
         // populate the dropdown with the names of the presets
         List<string> presetNames = new List<string>();
-        foreach (var content in contents)
+        foreach (var content in presets)
         {
             presetNames.Add(content.name);
         }
@@ -478,7 +572,7 @@ public class ARPlaceAnchor : MonoBehaviour
     {
         isPlacingContent = true;
 
-        GameObject preset = Instantiate(contents[presetsDropdown.value]);
+        GameObject preset = Instantiate(presets[presetsDropdown.value]);
         preset.transform.SetParent(contentParent.transform);
         preset.transform.localScale = new Vector3(1f, 1f, 1f);
 
@@ -489,7 +583,7 @@ public class ARPlaceAnchor : MonoBehaviour
         {
             anchorID = "",
             anchorType = AnchorType.Preset,
-            anchorData = preset.name
+            anchorData = preset.name.Replace("(Clone)", "")
         };
 
         currentAnchorObject = preset;
@@ -524,11 +618,19 @@ public class ARPlaceAnchor : MonoBehaviour
                 currentAnchorData = new AnchorData
                 {
                     anchorID = "",
-                    anchorType = AnchorType.Media,
-                    anchorData = path
+                    anchorType = AnchorType.Image,
+                    anchorData = ""
                 };
 
                 currentAnchorObject = imageContent;
+
+                byte[] imageBytes = texture.EncodeToPNG();
+
+                Debug.Log("Uploading media to Firebase Storage...");
+
+                string fileName = System.Guid.NewGuid().ToString() + Path.GetExtension(path);
+
+                FirebaseManager.UploadMedia(imageBytes, fileName, currentAnchorData);
             }
         }, "Select a PNG image", "image/png");
     }
@@ -588,12 +690,96 @@ public class ARPlaceAnchor : MonoBehaviour
                 currentAnchorData = new AnchorData
                 {
                     anchorID = "",
-                    anchorType = AnchorType.Media,
-                    anchorData = path
+                    anchorType = AnchorType.Video,
+                    anchorData = ""
                 };
 
                 currentAnchorObject = videoDisplay;
+
+                // Read the video file as bytes
+                byte[] videoBytes = File.ReadAllBytes(path);
+
+                // Generate a unique file name
+                string fileName = System.Guid.NewGuid().ToString() + Path.GetExtension(path);
+
+                // Upload the video bytes to Firebase
+                FirebaseManager.UploadMedia(videoBytes, fileName, currentAnchorData);
             }
         }, "Select a video", "mp4");
+    }
+    public void CreateImageFromPath(string path, ARAnchor anchor)
+    {
+        byte[] imageBytes = File.ReadAllBytes(path);
+        // decode the bytes to a texture
+        Texture2D texture = new Texture2D(1, 1);
+        texture.LoadImage(imageBytes);
+
+        Sprite sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+        // Create a new GameObject with a renderer component
+        GameObject imageContent = new GameObject("Image");
+        imageContent.transform.SetParent(contentParent.transform);
+        imageContent.transform.localScale = new Vector3(3f, 3f, 3f);
+        var renderer = imageContent.AddComponent<SpriteRenderer>();
+        renderer.sprite = sprite;
+
+        imageContent.transform.SetPositionAndRotation(anchor.transform.position, anchor.transform.rotation);
+    }
+    public void CreateVideoFromPath(string path, ARAnchor anchor)
+    {
+        // Create a new GameObject with a video player component
+        GameObject videoContent = new GameObject("Video");
+        videoContent.transform.SetParent(contentParent.transform);
+        videoContent.transform.localScale = new Vector3(0.03f, 0.03f, 0.03f);
+
+        // Add VideoPlayer component
+        var videoPlayer = videoContent.AddComponent<VideoPlayer>();
+        videoPlayer.url = path;
+        videoPlayer.isLooping = true;
+
+        // Create a RawImage for displaying the video
+        GameObject videoDisplay = new GameObject("VideoDisplay");
+        videoDisplay.transform.SetParent(videoContent.transform);
+        videoDisplay.transform.localPosition = Vector3.zero;
+        videoDisplay.transform.localScale = new Vector3(1f, 1f, 1f);
+
+        RawImage rawImage = videoDisplay.AddComponent<RawImage>();
+
+        // Set the VideoPlayer's target texture to a RenderTexture
+        RenderTexture renderTexture = new RenderTexture(1920, 1080, 0); // Initial size, will be adjusted
+        videoPlayer.targetTexture = renderTexture;
+        rawImage.texture = renderTexture;
+
+        // Adjust the size of RawImage based on the video resolution
+        videoPlayer.prepareCompleted += (VideoPlayer vp) =>
+        {
+            // Get the video resolution
+            int videoWidth = (int)vp.width;
+            int videoHeight = (int)vp.height;
+
+            // Adjust the RenderTexture and RawImage size
+            renderTexture.Release();
+            renderTexture.width = videoWidth;
+            renderTexture.height = videoHeight;
+            renderTexture.Create();
+
+            rawImage.rectTransform.sizeDelta = new Vector2(videoWidth, videoHeight);
+        };
+
+        // Prepare the video player to trigger the prepareCompleted event
+        videoPlayer.Prepare();
+
+        // Set the position and rotation of the videoContent
+        videoContent.transform.SetPositionAndRotation(anchor.transform.position, anchor.transform.rotation);
+    }
+    public IEnumerator CheckForAnchorsAndLoad()
+    {
+        Debug.Log("Checking for anchors...");
+        var wait = new WaitForSeconds(1.0f);
+        while (anchorManager.trackables.count == 0)
+        {
+            yield return wait;
+        }
+        Debug.Log("Anchors found. Loading...");
+        LoadAnchors();
     }
 }

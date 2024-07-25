@@ -37,7 +37,8 @@ namespace UnityEngine.XR.ARFoundation.Samples
         [SerializeField] GameObject UIButtons;
         [SerializeField] GameObject minimap;
 
-        static string path => Path.Combine(Application.persistentDataPath, "my_session.worldmap");
+        static string fileName = "my_session.worldmap";
+        static string path => Path.Combine(Application.persistentDataPath, fileName);
 
         public static ARWorldMapController Instance { get; private set; }
 
@@ -69,7 +70,19 @@ namespace UnityEngine.XR.ARFoundation.Samples
         public void OnLoadButton()
         {
 #if UNITY_IOS
-            StartCoroutine(Load());
+            if (!File.Exists(path))
+            {
+                Debug.Log("No ARWorldMap found. Downloading from Firestore...");
+                FirebaseManager.DownloadARWorldMap(fileName, (worldMapBytes) =>
+                {
+                    ParseByteArray(worldMapBytes);
+                });
+            }
+            else
+            {
+                Debug.Log("Loading ARWorldMap from disk...");
+                StartCoroutine(Load());
+            }
 #endif
         }
 
@@ -116,6 +129,8 @@ namespace UnityEngine.XR.ARFoundation.Samples
             Log("Serializing ARWorldMap to byte array...");
             var data = worldMap.Serialize(Allocator.Temp);
             Log($"ARWorldMap has {data.Length} bytes.");
+            byte[] worldMapBytes = data.ToArray();
+            Log("ARWorldMap serialized to byte array.");
 
             var file = File.Open(path, FileMode.Create);
             var writer = new BinaryWriter(file);
@@ -123,9 +138,10 @@ namespace UnityEngine.XR.ARFoundation.Samples
             writer.Close();
             data.Dispose();
             worldMap.Dispose();
+
             Log($"ARWorldMap written to {path}");
 
-            FirebaseManager.SaveWorldMap(path);
+            FirebaseManager.UploadARWorldMap(worldMapBytes, fileName);
         }
 
         IEnumerator Load()
@@ -138,8 +154,6 @@ namespace UnityEngine.XR.ARFoundation.Samples
             }
 
             FileStream file;
-            // wait until the file is downloaded
-
             try
             {
                 file = File.Open(path, FileMode.Open);
@@ -183,10 +197,8 @@ namespace UnityEngine.XR.ARFoundation.Samples
 
             Log("Apply ARWorldMap to current session.");
             sessionSubsystem.ApplyWorldMap(worldMap);
-
-            // yield return new WaitUntil(() => ARSession.state == ARSessionState.SessionTracking);
-            Log("Loading anchors...");
-            ARPlaceAnchor.Instance.LoadAnchors();
+            // Check for recognized anchors periodically
+            StartCoroutine(ARPlaceAnchor.Instance.CheckForAnchorsAndLoad());
         }
 #endif
 
@@ -268,6 +280,31 @@ namespace UnityEngine.XR.ARFoundation.Samples
             anchorButtons.SetActive(canPlaceAnchors);
             UIButtons.SetActive(!canPlaceAnchors);
             minimap.SetActive(!canPlaceAnchors);
+        }
+        private void ParseByteArray(byte[] worldMapBytes)
+        {
+            var data = new NativeArray<byte>(worldMapBytes.Length, Allocator.Temp);
+            data.CopyFrom(worldMapBytes);
+
+            Log("Deserializing to ARWorldMap...");
+            if (ARWorldMap.TryDeserialize(data, out ARWorldMap worldMap))
+                data.Dispose();
+
+            if (worldMap.valid)
+            {
+                Log("Deserialized successfully.");
+            }
+            else
+            {
+                Debug.LogError("Data is not a valid ARWorldMap.");
+                return;
+            }
+
+            Log("Apply ARWorldMap to current session.");
+            var sessionSubsystem = (ARKitSessionSubsystem)m_ARSession.subsystem;
+            sessionSubsystem.ApplyWorldMap(worldMap);
+            // Check for recognized anchors periodically
+            StartCoroutine(ARPlaceAnchor.Instance.CheckForAnchorsAndLoad());
         }
     }
 }

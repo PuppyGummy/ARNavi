@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Collections;
+using UnityEngine.Networking;
 
 public class FirebaseManager : MonoBehaviour
 {
@@ -66,7 +67,7 @@ public class FirebaseManager : MonoBehaviour
         }
 #endif
     }
-    public static void SaveAnchorDataList(AnchorDataList anchorDataList)
+    public static void UploadAnchorDataList(AnchorDataList anchorDataList)
     {
         // Convert the AnchorDataList object to JSON
         string json = JsonUtility.ToJson(anchorDataList);
@@ -89,7 +90,7 @@ public class FirebaseManager : MonoBehaviour
         });
     }
 
-    public static AnchorDataList LoadAnchorDataList()
+    public static void DownloadAnchorDataList(Action<AnchorDataList> onComplete)
     {
         // Load the data from Firestore
         Firestore.Collection("anchorData").Document("anchorDataList").GetSnapshotAsync().ContinueWithOnMainThread(task =>
@@ -106,37 +107,39 @@ public class FirebaseManager : MonoBehaviour
                     AnchorDataList anchorDataList = JsonUtility.FromJson<AnchorDataList>(json);
 
                     Debug.Log("AnchorDataList loaded successfully.");
-                    return anchorDataList;
+                    onComplete?.Invoke(anchorDataList); // Invoke the callback with the loaded data
                 }
                 else
                 {
                     Debug.LogError("No AnchorDataList found in Firestore.");
-                    return null;
+                    onComplete?.Invoke(null); // Invoke the callback with null if no data found
                 }
             }
             else
             {
                 Debug.LogError("Error loading AnchorDataList: " + task.Exception);
-                return null;
+                onComplete?.Invoke(null); // Invoke the callback with null if there was an error
             }
         });
-        return null;
     }
-    public static void UploadAndSaveMedia(string localPath, AnchorData anchorData)
+
+    public static void UploadMedia(byte[] bytes, string fileName, AnchorData anchorData)
     {
-        string fileName = System.Guid.NewGuid().ToString() + System.IO.Path.GetExtension(localPath);
         StorageReference storageRef = StorageReference.Child("media/" + fileName);
-        storageRef.PutFileAsync(localPath).ContinueWithOnMainThread(task =>
+        Debug.Log("Uploading media to Firebase Storage: " + fileName);
+
+        storageRef.PutBytesAsync(bytes).ContinueWithOnMainThread(task =>
         {
             if (task.IsCompleted)
             {
+                Debug.Log("Media uploaded to Firebase Storage successfully.");
                 storageRef.GetDownloadUrlAsync().ContinueWithOnMainThread(urlTask =>
                 {
                     if (urlTask.IsCompleted)
                     {
                         string downloadUrl = urlTask.Result.ToString();
                         anchorData.anchorData = downloadUrl;
-                        Debug.Log("Media uploaded to Firebase Storage successfully.");
+                        Debug.Log("Download URL: " + downloadUrl);
                     }
                     else
                     {
@@ -150,38 +153,194 @@ public class FirebaseManager : MonoBehaviour
             }
         });
     }
-    public static void SaveWorldMap(string filePath)
+
+    // public static void UploadARWorldMap(byte[] bytes, string filePath)
+    // {
+    //     string fileName = Path.GetFileName(filePath);
+    //     Debug.Log("Uploading ARWorldMap to Firestore...");
+
+    //     // Check if file exists
+    //     if (!File.Exists(filePath))
+    //     {
+    //         Debug.LogError("File not found at path: " + filePath);
+    //         return;
+    //     }
+
+    //     try
+    //     {
+    //         byte[] fileBytes = File.ReadAllBytes(filePath);
+    //         string base64String = Convert.ToBase64String(fileBytes);
+
+    //         Firestore.Collection("worldmaps").Document(fileName).SetAsync(new Dictionary<string, object>
+    //     {
+    //         { fileName, base64String }
+    //     }).ContinueWithOnMainThread(task =>
+    //     {
+    //         if (task.IsCompleted)
+    //         {
+    //             Debug.Log("ARWorldMap uploaded to Firestore successfully.");
+    //         }
+    //         else
+    //         {
+    //             Debug.LogError("Failed to upload ARWorldMap to Firestore: " + task.Exception);
+    //         }
+    //     });
+    //     }
+    //     catch (Exception e)
+    //     {
+    //         Debug.LogError("Failed to read or upload file: " + e.Message);
+    //     }
+    // }
+    public static void UploadARWorldMap(byte[] bytes, string fileName)
     {
-        string fileName = Path.GetFileName(filePath);
-        Debug.Log("Uploading ARWorldMap to Firebase...");
-        Debug.Log("fileName: " + fileName);
-        var storageRef = StorageReference.Child("worldmaps/" + fileName);
-        storageRef.PutFileAsync(filePath).ContinueWithOnMainThread(task =>
+        Debug.Log("Uploading ARWorldMap to Firebase Storage...");
+
+        StorageReference storageRef = FirebaseStorage.DefaultInstance.RootReference.Child("worldmaps/" + fileName);
+        storageRef.PutBytesAsync(bytes).ContinueWithOnMainThread(task =>
         {
             if (task.IsCompleted)
             {
-                Debug.Log("ARWorldMap uploaded to Firebase successfully.");
+                Debug.Log("ARWorldMap uploaded to Firebase Storage successfully.");
             }
             else
             {
-                Debug.LogError("Failed to upload ARWorldMap to Firebase: " + task.Exception);
+                Debug.LogError("Failed to upload ARWorldMap: " + task.Exception);
             }
         });
     }
-    public static IEnumerator DownloadWorldMapFromFirebase(string filePath)
+
+    // public static void DownloadWorldMap(string fileName, string savePath, Action<bool> callback)
+    // {
+    //     Debug.Log("Downloading ARWorldMap from Firestore...");
+
+    //     Firestore.Collection("worldmaps").Document(fileName).GetSnapshotAsync().ContinueWithOnMainThread(task =>
+    //     {
+    //         bool success = false;
+
+    //         if (task.IsCompleted)
+    //         {
+    //             var snapshot = task.Result;
+    //             if (snapshot.Exists)
+    //             {
+    //                 Debug.Log("Document found, downloading ARWorldMap...");
+    //                 Dictionary<string, object> document = snapshot.ToDictionary();
+    //                 if (document.TryGetValue(fileName, out object base64Object))
+    //                 {
+    //                     string base64String = base64Object as string;
+    //                     if (!string.IsNullOrEmpty(base64String))
+    //                     {
+    //                         try
+    //                         {
+    //                             byte[] fileBytes = Convert.FromBase64String(base64String);
+    //                             File.WriteAllBytes(savePath, fileBytes);
+    //                             Debug.Log("ARWorldMap downloaded and saved successfully to: " + savePath);
+    //                             success = true;
+    //                         }
+    //                         catch (Exception e)
+    //                         {
+    //                             Debug.LogError("Failed to write file: " + e.Message);
+    //                         }
+    //                     }
+    //                     else
+    //                     {
+    //                         Debug.LogError("Base64 string is null or empty.");
+    //                     }
+    //                 }
+    //                 else
+    //                 {
+    //                     Debug.LogError("Base64 string not found in document.");
+    //                 }
+    //             }
+    //             else
+    //             {
+    //                 Debug.LogError("Document does not exist.");
+    //             }
+    //         }
+    //         else
+    //         {
+    //             Debug.LogError("Failed to download ARWorldMap from Firestore: " + task.Exception);
+    //         }
+
+    //         // Invoke the callback with the success status
+    //         callback?.Invoke(success);
+    //     });
+    // }
+    public static IEnumerator DownloadWorldMap(string fileName, string savePath, System.Action<bool> callback)
     {
-        string fileName = Path.GetFileName(filePath);
-        var storageRef = StorageReference.Child("worldmaps/" + fileName);
-        var task = storageRef.GetFileAsync(filePath);
-
-        yield return new WaitUntil(() => task.IsCompleted);
-
-        if (task.IsFaulted || task.IsCanceled)
+        StorageReference storageRef = FirebaseStorage.DefaultInstance.RootReference.Child("worldmaps/" + fileName);
+        storageRef.GetDownloadUrlAsync().ContinueWithOnMainThread(task =>
         {
-            Debug.LogError("Failed to download ARWorldMap from Firebase: " + task.Exception);
-            yield break;
-        }
+            if (task.IsCompleted)
+            {
+                string downloadUrl = task.Result.ToString();
+                Debug.Log("Download URL: " + downloadUrl);
+                // Call StartCoroutine on an instance of MonoBehaviour
+                MonoBehaviour instance = new MonoBehaviour();
+                instance.StartCoroutine(DownloadFile(downloadUrl, savePath, callback));
+            }
+            else
+            {
+                Debug.LogError("Failed to get download URL: " + task.Exception);
+                callback?.Invoke(false);
+            }
+        });
+        yield return null;
+    }
+    private static IEnumerator DownloadFile(string downloadUrl, string savePath, System.Action<bool> callback)
+    {
+        using (UnityWebRequest request = UnityWebRequest.Get(downloadUrl))
+        {
+            // Send request and wait for a response
+            yield return request.SendWebRequest();
 
-        Debug.Log("ARWorldMap downloaded from Firebase successfully.");
+            // Check for errors
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                try
+                {
+                    // Ensure the directory exists
+                    string directoryPath = Path.GetDirectoryName(savePath);
+                    if (!Directory.Exists(directoryPath))
+                    {
+                        Directory.CreateDirectory(directoryPath);
+                    }
+
+                    // Write the downloaded data to a file
+                    File.WriteAllBytes(savePath, request.downloadHandler.data);
+                    Debug.Log("World map downloaded and saved successfully to: " + savePath);
+                    callback?.Invoke(true); // Invoke callback with success
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError("Failed to write file: " + e.Message);
+                    callback?.Invoke(false); // Invoke callback with failure
+                }
+            }
+            else
+            {
+                Debug.LogError("Failed to download world map: " + request.error);
+                callback?.Invoke(false); // Invoke callback with failure
+            }
+        }
+    }
+    public static void DownloadARWorldMap(string fileName, Action<byte[]> onDownloadComplete)
+    {
+        Debug.Log("Downloading ARWorldMap from Firebase Storage...");
+
+        StorageReference storageRef = FirebaseStorage.DefaultInstance.RootReference.Child("worldmaps/" + fileName);
+
+        storageRef.GetBytesAsync(1024 * 1024 * 10).ContinueWithOnMainThread(task =>
+        {
+            if (task.IsCompleted)
+            {
+                byte[] downloadedBytes = task.Result;
+                Debug.Log("ARWorldMap downloaded successfully.");
+                onDownloadComplete(downloadedBytes); // Call the callback with the downloaded data
+            }
+            else
+            {
+                Debug.LogError("Failed to download ARWorldMap: " + task.Exception);
+            }
+        });
     }
 }
