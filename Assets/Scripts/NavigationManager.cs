@@ -326,4 +326,23 @@ public class NavigationManager : MonoBehaviour
             arrivedFlag = false;
         }
     }
+    public void ResetNavigationTarget(bool canEditAnchors)
+    {
+        if (canEditAnchors)
+        {
+            if (currentTarget != null)
+            {
+                currentTarget.GetComponent<MeshRenderer>().enabled = false;
+                arrowVisualization.SetActive(false);
+            }
+        }
+        else
+        {
+            if (currentTarget != null)
+            {
+                currentTarget.GetComponent<MeshRenderer>().enabled = true;
+                arrowVisualization.SetActive(true);
+            }
+        }
+    }
 }

@@ -74,5 +74,8 @@ public class PathArrowVisualization : MonoBehaviour
             arrow.transform.position = new Vector3(arrow.transform.position.x, slider.value, arrow.transform.position.z);
         }
     }
-
+    public void DisableArrow()
+    {
+        arrow.SetActive(false);
+    }
 }

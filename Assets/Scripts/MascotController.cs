@@ -41,14 +41,14 @@ public class MascotController : MonoBehaviour
     private Vector3 currentPosition;
     private bool setMascotAtFirstTime = false;
     private float time;
-    public bool mascotActive = false;
+    public bool mascotActive = true;
     private int currentMascotIndex = 0;
 
     private bool sunOn = true;
     private bool leafOn = false;
     private bool waterOn = false;
     private bool buddyDisabled = false;
-    
+
 
     public static MascotController Instance;
     private void Awake()
@@ -85,11 +85,11 @@ public class MascotController : MonoBehaviour
         //if not navigating from explore mode, turn off the explore exclusive features
         if (_fromExplore == false)
         {
+            mascotActive = false;
+            mascotTransform.gameObject.SetActive(mascotActive);
             openBuddyMenu.gameObject.SetActive(false);
             showPOIButton.gameObject.SetActive(false);
-
         }
-
     }
 
     void Update()
@@ -228,20 +228,20 @@ public class MascotController : MonoBehaviour
         bool waterSet = false;
         bool offSet = false;
 
-        foreach(Transform slot in menuSlots.transform)
+        foreach (Transform slot in menuSlots.transform)
         {
             Debug.Log(slot.name);
         }
         foreach (Transform slot in menuSlots.transform)
         {
-         
+
             bool slotFilled = false;
             //clear menu slot
             foreach (Transform button in slot.transform)
             {
                 GameObject.Destroy(button.gameObject);
             }
-            if(!slotFilled && !sunOn && !sunSet)
+            if (!slotFilled && !sunOn && !sunSet)
             {
                 slotFilled = true;
                 sunSet = true;
@@ -249,7 +249,7 @@ public class MascotController : MonoBehaviour
                 newButton.GetComponent<Button>().onClick.AddListener(() => SetBuddyToSun());
 
             }
-            if(!slotFilled && !leafOn && !leafSet)
+            if (!slotFilled && !leafOn && !leafSet)
             {
                 slotFilled = true;
                 leafSet = true;
@@ -257,7 +257,7 @@ public class MascotController : MonoBehaviour
                 newButton.GetComponent<Button>().onClick.AddListener(() => SetBuddyToLeaf());
 
             }
-            if(!slotFilled && !waterOn && !waterSet)
+            if (!slotFilled && !waterOn && !waterSet)
             {
                 slotFilled = true;
                 waterSet = true;
@@ -265,7 +265,7 @@ public class MascotController : MonoBehaviour
                 newButton.GetComponent<Button>().onClick.AddListener(() => SetBuddyToWater());
 
             }
-            if(!slotFilled && !buddyDisabled && !offSet)
+            if (!slotFilled && !buddyDisabled && !offSet)
             {
                 slotFilled = true;
                 offSet = true;

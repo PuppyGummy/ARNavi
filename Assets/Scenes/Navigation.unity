@@ -7480,7 +7480,7 @@ GameObject:
   m_Component:
   - component: {fileID: 513557251}
   m_Layer: 0
-  m_Name: SecondFloor
+  m_Name: F2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7896,7 +7896,7 @@ GameObject:
   m_Component:
   - component: {fileID: 570487439}
   m_Layer: 0
-  m_Name: FirstFloor
+  m_Name: F1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14833,7 +14833,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1139917525}
   m_Layer: 0
-  m_Name: FirstFloorStartPoint
+  m_Name: F1StartPoint
   m_TagString: Untagged
   m_Icon: {fileID: 6519382022992737161, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
@@ -23327,7 +23327,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1876569562}
   m_Layer: 0
-  m_Name: SecondFloorStartPoint
+  m_Name: F2StartPoint
   m_TagString: Untagged
   m_Icon: {fileID: 2488908585195742037, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
