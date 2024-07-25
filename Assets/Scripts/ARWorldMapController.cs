@@ -36,6 +36,9 @@ namespace UnityEngine.XR.ARFoundation.Samples
         [SerializeField] GameObject anchorButtons;
         [SerializeField] GameObject UIButtons;
         [SerializeField] GameObject minimap;
+        [SerializeField] Button m_LoadButton;
+        [SerializeField] Button m_SaveButton;
+        [SerializeField] Button m_AddButton;
 
         static string fileName = "my_session.worldmap";
         static string path => Path.Combine(Application.persistentDataPath, fileName);
@@ -241,20 +244,29 @@ namespace UnityEngine.XR.ARFoundation.Samples
 
         void Update()
         {
-            // if (supported)
-            // {
-            //     SetActive(m_ErrorText, false);
-            //     SetActive(m_SaveButton, true);
-            //     SetActive(m_LoadButton, true);
-            //     SetActive(m_MappingStatusText, true);
-            // }
-            // else
-            // {
-            //     SetActive(m_ErrorText, true);
-            //     SetActive(m_SaveButton, false);
-            //     SetActive(m_LoadButton, false);
-            //     SetActive(m_MappingStatusText, false);
-            // }
+            if (supported)
+            {
+                if (ARPlaceAnchor.Instance.canEditAnchors)
+                {
+                    SetActive(m_ErrorText, false);
+                    SetActive(m_MappingStatusText, true);
+                }
+                m_SaveButton.interactable = true;
+                m_LoadButton.interactable = true;
+                m_AddButton.interactable = true;
+            }
+            else
+            {
+                if (ARPlaceAnchor.Instance.canEditAnchors)
+                {
+                    SetActive(m_ErrorText, true);
+                    SetActive(m_MappingStatusText, false);
+                }
+                m_SaveButton.interactable = false;
+                m_LoadButton.interactable = false;
+                m_AddButton.interactable = false;
+                m_ErrorText.text = "ARWorldMap is not supported on this device.";
+            }
 
 #if UNITY_IOS
             var sessionSubsystem = (ARKitSessionSubsystem)m_ARSession.subsystem;

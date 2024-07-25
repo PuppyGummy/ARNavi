@@ -5,12 +5,6 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 0
-    path: Assets/DigitsNFCToolkit/Samples/Scenes/NFCTools.unity
-    guid: befa626c478f23b4cb9ead522d1c55fb
-  - enabled: 0
-    path: Assets/Scenes/TestScene.unity
-    guid: acbe9dcbb06bb4fc4a12ec8d5a8fe355
   - enabled: 1
     path: Assets/Scenes/Welcome.unity
     guid: 950750146ffae8d4da3277760044d151
@@ -38,9 +32,6 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Information.unity
     guid: 34a68f05e0d4e41d4af8ac79c020b980
-  - enabled: 0
-    path: Assets/Scenes/Acknowledgements.unity
-    guid: c1cc8ff74bdb34c9281d5054d1161dbe
   m_configObjects:
     Niantic.Lightship.AR.LightshipSettings: {fileID: 11400000, guid: 05b0489c7d3114fe3b5a5321c06a66dd, type: 2}
     Niantic.Lightship.AR.WPSSettings: {fileID: 11400000, guid: ee6baa83fec89444b99181fc1ccffc2a, type: 2}

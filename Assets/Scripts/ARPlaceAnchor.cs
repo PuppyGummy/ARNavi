@@ -30,7 +30,7 @@ public class ARPlaceAnchor : MonoBehaviour
     private float contentHeight = 0.6f;
     private AnchorDataList anchorDataList = new AnchorDataList();
     [SerializeField] private bool canPlaceAnchors = false;
-    [SerializeField] private bool canEditAnchors = false;
+    [SerializeField] public bool canEditAnchors = false;
     [SerializeField] private TMP_InputField inputX;
     [SerializeField] private TMP_InputField inputY;
     [SerializeField] private TMP_InputField inputZ;

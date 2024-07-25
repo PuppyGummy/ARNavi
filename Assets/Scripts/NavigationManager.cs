@@ -32,7 +32,7 @@ public class NavigationManager : MonoBehaviour
     public GameObject userIndicator;
     private bool wallToggle = false;
     public NavMeshPath path { get; private set; }
-    private GameObject currentTarget;
+    public GameObject currentTarget;
     public GameObject currentFloor { get; private set; }
     [SerializeField] private GameObject lineVisualization;
     [SerializeField] private GameObject arrowVisualization;
@@ -99,7 +99,7 @@ public class NavigationManager : MonoBehaviour
         HasArrived();
     }
     //after getting to navigation screen from the selection page, change the target to reflect the choice
-     public void SetTargetInitial()
+    public void SetTargetInitial()
     {
 
         //get current target set in main menu page
@@ -151,7 +151,7 @@ public class NavigationManager : MonoBehaviour
                 }
             }
         }
-        
+
         //set current floor according to the newly set dropdown
         SetCurrentFloor();
     }
