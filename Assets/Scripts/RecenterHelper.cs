@@ -49,7 +49,7 @@ public class RecenterHelper : MonoBehaviour
         {
             recenterTargetList.Add(target.gameObject);
         }
-        Recenter("FirstFloorStartPoint");
+        Recenter("F1StartPoint");
         foreach (var target in recenterTargetList)
         {
             targetFlags[target] = false;

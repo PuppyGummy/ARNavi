@@ -39,7 +39,6 @@ public class SearchControl : MonoBehaviour
 
     public void Start()
     {
-        
         floors = targetList.floors;
         //the first floor is chosen by default
         targets = targetList.floors[0].targetsOnFloor;
@@ -63,11 +62,11 @@ public class SearchControl : MonoBehaviour
         {
             GameObject newButton = Instantiate(searchResultPrefab, searchResultsHolder.transform);
             newButton.GetComponent<Button>().onClick.AddListener(() => SearchResultOnClick());
-            newButton.name =  target.targetName+ "-" + target.targetId;
+            newButton.name = target.targetName + "-" + target.targetId;
             newButton.GetComponentInChildren<TextMeshProUGUI>().text = target.targetName;
             newButton.transform.Find("Description").gameObject.GetComponent<TextMeshProUGUI>().text = target.addressInfo;
             newButton.transform.Find("SearchImage").gameObject.GetComponent<Image>().sprite = SaveLoadManager.LoadSearchImage(target.imgPath);
-            
+
         }
     }
 
@@ -87,7 +86,7 @@ public class SearchControl : MonoBehaviour
         List<Target> newTargets = targetsByFloor.Where(s => s.targetName.ToLower().StartsWith(input.ToLower())).ToList();
 
         List<Target> filteredTargets = new List<Target>();
-        
+
         foreach (Target target in newTargets)
         {
             if (funToggle.isOn && target.tag == "Fun")
@@ -103,7 +102,7 @@ public class SearchControl : MonoBehaviour
                 filteredTargets.Add(target);
             }
         }
-        
+
         //if no filters are on, just display all targets on the current floor
         if (!funToggle.isOn && !medToggle.isOn && !amenitiesToggle.isOn)
         {
@@ -186,7 +185,6 @@ public class SearchControl : MonoBehaviour
         //get the text of the choice chosen in dropdown and changes the current search to match 
         userSearch.text = targetListDropdown.captionText.text;
         //change currentTarget to match
-        //TODO: Make this not shitty
         foreach (Target target in targets)
         {
             if (target.targetName == targetListDropdown.captionText.text)
@@ -229,11 +227,11 @@ public class SearchControl : MonoBehaviour
     {
         string buttonName = EventSystem.current.currentSelectedGameObject.name;
         Scene scene = SceneManager.GetActiveScene();
-        if(scene.buildIndex == 6)
+        if (scene.buildIndex == 6)
         {
             fromExplore = true;
         }
-        else 
+        else
         {
             fromExplore = false;
         }
@@ -242,7 +240,7 @@ public class SearchControl : MonoBehaviour
         {
             foreach (Target target in floor.targetsOnFloor)
             {
-                if (target.targetName+"-"+target.targetId == buttonName)
+                if (target.targetName + "-" + target.targetId == buttonName)
                 {
                     currentTarget = target;
                     currentFloor = floor;

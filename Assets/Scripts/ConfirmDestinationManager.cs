@@ -26,9 +26,5 @@ public class ConfirmDestinationManager : MonoBehaviour
             description.SetText(currentDestination.addressInfo);
             siteImage.sprite = SaveLoadManager.LoadSearchImage(currentDestination.imgPath);
         }
-
-        
     }
-
-
 }

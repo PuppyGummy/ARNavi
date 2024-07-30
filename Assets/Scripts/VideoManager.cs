@@ -4,12 +4,11 @@ using UnityEngine;
 using UnityEngine.Video;
 public class VideoManager : MonoBehaviour
 {
-
     [SerializeField] private VideoPlayer openingVideo;
 
     //Start is called before the first frame update
     void Awake()
-    { 
+    {
         openingVideo.loopPointReached += CheckOver;
     }
     //Checks to see when the animation is finished

@@ -49,7 +49,6 @@ public class MascotController : MonoBehaviour
     private bool waterOn = false;
     private bool buddyDisabled = false;
 
-
     public static MascotController Instance;
     private void Awake()
     {

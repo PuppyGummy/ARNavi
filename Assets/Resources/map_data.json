@@ -181,7 +181,7 @@
             "imgPath": ""
         },
         {
-            "targetName": "SecondFloorStartPoint",
+            "targetName": "F2StartPoint",
             "targetPosition": {
                 "x": 40.67000198364258,
                 "y": 0.0,
@@ -193,7 +193,7 @@
             "imgPath": ""
         },
         {
-            "targetName": "FirstFloorStartPoint",
+            "targetName": "F1StartPoint",
             "targetPosition": {
                 "x": -0.00099945068359375,
                 "y": 0.0,

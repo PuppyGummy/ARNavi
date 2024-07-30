@@ -356,7 +356,7 @@ public class ARPlaceAnchor : MonoBehaviour
     {
         canEditAnchors = !canEditAnchors;
         ARWorldMapController.Instance.TogglePlaceAnchorsUI(canPlaceAnchors || canEditAnchors);
-        NavigationManager.Instance.ResetNavigationTarget(canEditAnchors);
+        NavigationManager.Instance.HideNavigationTarget(canEditAnchors);
     }
     public void SetCurrentAnchor(ARAnchor anchor)
     {

@@ -26439,6 +26439,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 40765840207022903, guid: cdf2ab61b63e846d59b5fd7a65991539, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 40765840207022906, guid: cdf2ab61b63e846d59b5fd7a65991539, type: 3}
       propertyPath: m_Name
       value: Project Room 2

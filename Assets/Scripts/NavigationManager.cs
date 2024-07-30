@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.AI;
-// using Niantic.Experimental.Lightship.AR.WorldPositioning;
 using UnityEngine.XR.ARFoundation;
 using Unity.XR.CoreUtils;
 using UnityEngine.UI;
@@ -20,9 +19,7 @@ public class NavigationManager : MonoBehaviour
     public Vector3 targetPosition = Vector3.zero;
     [SerializeField] private TMP_Text statusText;
     [SerializeField] private XROrigin sessionOrigin;
-    // private ARWorldPositioningCameraHelper cameraHelper;
     [SerializeField] private ARCameraManager arCameraManager;
-    // [SerializeField] private ARWorldPositioningManager wpsManager;
     [SerializeField] private Button wallToggleButton;
     [SerializeField] private GameObject wallParent;
     [SerializeField] private Material defaultMaterial;
@@ -71,7 +68,6 @@ public class NavigationManager : MonoBehaviour
     private void Start()
     {
         path = new NavMeshPath();
-        // cameraHelper = arCameraManager.GetComponent<ARWorldPositioningCameraHelper>();
         SetMaterial(wallParent.transform, occlusionMaterial);
         lineVisualization.SetActive(false);
         arrowVisualization.SetActive(true);
@@ -85,9 +81,7 @@ public class NavigationManager : MonoBehaviour
     }
     private void Update()
     {
-        // statusText.text = "WPS: " + wpsManager.Status.ToString();
         // UpdateUserRotation();
-        // WorldPositionUpdate();
         if (targetPosition != Vector3.zero)
         {
             NavMesh.CalculatePath(userIndicator.transform.position, targetPosition, NavMesh.AllAreas, path);
@@ -101,7 +95,6 @@ public class NavigationManager : MonoBehaviour
     //after getting to navigation screen from the selection page, change the target to reflect the choice
     public void SetTargetInitial()
     {
-
         //get current target set in main menu page
         Target tarSelect = SearchControl.GetCurrentTarget();
         if (tarSelect == null)
@@ -123,7 +116,6 @@ public class NavigationManager : MonoBehaviour
         }
         //set current navigation target accrording to the newly set dropdown
         SetCurrentNavigationTarget();
-
     }
 
     //after getting to the navigation screen from the selection page, change the floor to reflect the choice
@@ -172,11 +164,6 @@ public class NavigationManager : MonoBehaviour
         currentTarget.GetComponent<MeshRenderer>().enabled = true;
         targetPosition = currentTarget.transform.position;
     }
-    // private void WorldPositionUpdate()
-    // {
-    //     float heading = cameraHelper.TrueHeading;
-    //     userIndicator.transform.rotation = Quaternion.Euler(0, heading, 0);
-    // }
     public void SetCurrentFloor()
     {
         targetList.Clear();
@@ -326,7 +313,7 @@ public class NavigationManager : MonoBehaviour
             arrivedFlag = false;
         }
     }
-    public void ResetNavigationTarget(bool canEditAnchors)
+    public void HideNavigationTarget(bool canEditAnchors)
     {
         if (canEditAnchors)
         {
